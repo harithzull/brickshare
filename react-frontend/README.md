@@ -2,6 +2,8 @@
 
 The main application uses React 18, Vite, and ethers.js v5.
 Follow the [root setup and run guide](../README.md) for the full local workflow.
+See [DESIGN.md](DESIGN.md) for the page/component structure, visual system,
+accessibility behavior, and trust boundaries.
 
 Visitors can browse live listings without connecting a wallet. The marketplace
 includes search, filters, property details and an explicit fictional sample
@@ -20,7 +22,10 @@ npm run dev
 
 ## Files
 
-- `src/App.jsx`: wallet connection, listings, forms, and transactions.
+- `src/App.jsx`: page composition, shared notices, and route transitions.
+- `src/pages/`: landing, marketplace, property research, portfolio, and administration.
+- `src/components/`: shared UI, navigation, cards, forms, allocation and transaction UI.
+- `src/hooks/useBrickShare.js`: wallet connection, transaction review/signing and admin actions.
 - `src/App.css`: application styles.
 - `src/config.js`: loads the generated contract configuration.
 - `src/hooks/useMarketplace.js`: read-only listing, holdings and history loading.

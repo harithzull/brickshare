@@ -1,25 +1,22 @@
 import PropertyArt from "./PropertyArt";
-import { subscription } from "../lib/marketplace";
+import Icon from "./Icon";
+import { PropertyStatusBadge, SubscriptionProgress } from "./ui";
 
 export default function PropertyCard({ property, onSelect }) {
-  const progress = subscription(property);
-  const state = !property.active
-    ? "Inactive"
-    : property.available === "0"
-    ? "Sold out"
-    : "Available";
   return (
     <article className="property-card">
       <div className="card-visual">
         <PropertyArt property={property} />
-        <span
-          className={`badge ${state === "Available" ? "available" : "neutral"}`}
-        >
-          {property.sample ? "Sample listing" : state}
-        </span>
+        <div className="card-badges">
+          <PropertyStatusBadge property={property} showSource />
+          {property.sample && <PropertyStatusBadge property={property} />}
+        </div>
       </div>
       <div className="property-card-body">
-        <p className="eyebrow">{property.location}</p>
+        <p className="property-location">
+          <Icon name="location" size={14} />
+          {property.location}
+        </p>
         <h3>
           <button
             className="title-button"
@@ -32,17 +29,11 @@ export default function PropertyCard({ property, onSelect }) {
           <strong>
             {property.priceEth} <small>ETH</small>
           </strong>
-          <span>per token</span>
+          <span>
+            per token{property.sample ? " · illustrative" : " · test ETH"}
+          </span>
         </div>
-        <div className="progress-label">
-          <span>Supply subscribed</span>
-          <strong>{progress}%</strong>
-        </div>
-        <progress
-          max="100"
-          value={progress}
-          aria-label={`${property.name}: ${progress}% subscribed`}
-        />
+        <SubscriptionProgress property={property} />
         <div className="card-foot">
           <span>
             {property.available} / {property.total} available
@@ -52,7 +43,7 @@ export default function PropertyCard({ property, onSelect }) {
             onClick={() => onSelect(property.id)}
             aria-label={`View ${property.name}`}
           >
-            View property <span aria-hidden="true">↗</span>
+            View property <Icon name="arrowUpRight" size={16} />
           </button>
         </div>
       </div>

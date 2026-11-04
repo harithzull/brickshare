@@ -43,6 +43,32 @@ export function subscription(property) {
   );
 }
 
+export function portfolioSummary(properties) {
+  const holdings = properties.filter((property) => property.mine !== "0");
+  const tokens = holdings.reduce(
+    (sum, property) => sum.add(property.mine),
+    ethers.constants.Zero
+  );
+  const referenceWei = holdings.reduce(
+    (sum, property) => sum.add(property.priceWei.mul(property.mine)),
+    ethers.constants.Zero
+  );
+  const allocation = holdings.map((property) => {
+    const valueWei = property.priceWei.mul(property.mine);
+    return {
+      id: property.id,
+      name: property.name,
+      valueWei,
+      percentage: percentage(valueWei, referenceWei),
+      // Convert only the bounded 0..100 chart geometry, never monetary amounts.
+      weight: referenceWei.isZero()
+        ? 0
+        : valueWei.mul(1000000).div(referenceWei).toNumber() / 10000,
+    };
+  });
+  return { holdings, tokens, referenceWei, allocation };
+}
+
 export function filterProperties(properties, search, location, status) {
   const query = search.trim().toLowerCase();
   return properties.filter((p) => {
