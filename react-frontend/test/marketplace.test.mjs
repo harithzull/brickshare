@@ -10,7 +10,9 @@ import {
   readProperties,
   safeContentUrl,
   subscription,
+  portfolioSummary,
 } from "../src/lib/marketplace.js";
+import { parseRoute, routeHref } from "../src/lib/navigation.js";
 
 const property = {
   id: "1",
@@ -48,6 +50,68 @@ test("ownership and subscription percentages support supplies above Number.MAX_S
   assert.equal(subscription(property), "1.00");
   assert.equal(percentage("0", "1000"), "0.00");
   assert.equal(percentage("1000", "1000"), "100.00");
+});
+
+test("portfolio allocation uses exact listing-price references rather than mixing token supplies", () => {
+  const expensive = {
+    ...property,
+    id: "2",
+    name: "Other property",
+    mine: "2",
+    priceWei: ethers.utils.parseEther("0.03"),
+  };
+  const result = portfolioSummary([
+    { ...property, mine: "2" },
+    expensive,
+    { ...property, id: "3", mine: "0" },
+  ]);
+  assert.equal(result.holdings.length, 2);
+  assert.equal(result.tokens.toString(), "4");
+  assert.equal(
+    result.referenceWei.toString(),
+    ethers.utils.parseEther("0.08").toString()
+  );
+  assert.deepEqual(
+    result.allocation.map((item) => item.percentage),
+    ["25.00", "75.00"]
+  );
+  assert.deepEqual(
+    result.allocation.map((item) => item.weight),
+    [25, 75]
+  );
+  assert.equal(portfolioSummary([]).referenceWei.toString(), "0");
+});
+
+test("portfolio aggregation retains precision with very large wallet balances", () => {
+  const large = "100000000000000000001";
+  const result = portfolioSummary([{ ...property, mine: large }]);
+  assert.equal(result.tokens.toString(), large);
+  assert.equal(
+    result.referenceWei.toString(),
+    property.priceWei.mul(large).toString()
+  );
+  assert.equal(result.allocation[0].weight, 100);
+});
+
+test("shareable navigation preserves sample isolation and handles malformed links", () => {
+  assert.deepEqual(
+    parseRoute(routeHref("property", { id: "sample-1", mode: "sample" })),
+    { page: "property", id: "sample-1", mode: "sample" }
+  );
+  assert.deepEqual(parseRoute(routeHref("property", { id: "2" })), {
+    page: "property",
+    id: "2",
+    mode: "live",
+  });
+  assert.deepEqual(parseRoute("#/portfolio?catalog=sample"), {
+    page: "portfolio",
+    mode: "live",
+  });
+  assert.deepEqual(parseRoute("#/property/%E0%A4"), {
+    page: "home",
+    mode: "live",
+  });
+  assert.deepEqual(parseRoute("#/unknown"), { page: "home", mode: "live" });
 });
 
 test("search combines location and true listing availability", () => {

@@ -28,12 +28,15 @@ illustrations; it cannot transact. Live network failures never substitute sample
 data. Additional photographs, descriptions and documents can be configured using
 the [property metadata guide](react-frontend/PROPERTY_METADATA.md).
 
+The redesigned interface has a dedicated overview, marketplace, property research,
+portfolio and administrator workspace. See the [frontend architecture guide](react-frontend/DESIGN.md).
+
 - The administrator adds a property with a fixed supply and a price per token.
 - Investors buy tokens by sending exactly quantity times token price in ETH.
 - Holders can transfer their tokens to another address.
 - The administrator can withdraw all collected purchase funds.
-- The contract supports enabling/disabling purchases for a property; the React
-  interface displays this status but does not yet provide a status editor.
+- The administrator can enable/disable new purchases from the property management table.
+  Status changes and treasury withdrawals require acknowledgement in transaction review.
 
 Token balances use custom mappings, not ERC-20 or ERC-1155. Deactivating a listing
 does not disable transfers. Each state-changing transaction requires gas.
@@ -112,7 +115,7 @@ must only be used with test funds. Connect the selected account through the app.
 
 1. As Account #0, add "Cyberjaya Condo", location "Cyberjaya", supply `1000`,
    price `0.01` ETH per token. Confirm the transaction in MetaMask.
-2. Switch to Account #1, reconnect after the page reloads, and buy `10` tokens of
+2. Switch to Account #1, reconnect when prompted, and buy `10` tokens of
    property ID `1`. The purchase costs `0.1` test ETH plus gas.
 3. Transfer `3` tokens to a different Hardhat account.
 4. Switch back to Account #0 and withdraw the collected purchase funds.
@@ -179,8 +182,8 @@ After intentionally changing dependencies, update the relevant lockfile with
   confirm the node is running, and redeploy if the node was restarted.
 - **Owner buttons disabled:** connect the wallet that deployed the contract
   (Account #0 in the default workflow).
-- **Balances or listings look stale:** use Refresh; account/network changes reload
-  the page and may require reconnecting.
+- **Balances or listings look stale:** use Refresh; account/network changes clear
+  the connected wallet context and require reconnecting.
 - **Nonce errors after resetting the local chain:** clear MetaMask's activity/nonce
   data for the development account and reconnect to the local network.
 - **Port in use:** use Vite's printed URL. The local blockchain must be available

@@ -1,0 +1,1705 @@
+@media (min-width: 1500px) {
+  .main-container {
+    max-width: 1328px;
+  }
+  .header-inner {
+    max-width: 1432px;
+  }
+  .admin-container {
+    max-width: 1432px;
+  }
+  .landing-hero {
+    gap: 70px;
+    min-height: 660px;
+  }
+  .hero-copy h1 {
+    font-size: 68px;
+  }
+  .hero-composition {
+    max-width: 550px;
+    min-height: 485px;
+  }
+}
+@media (max-width: 1150px) {
+  .header-inner {
+    padding: 14px 28px;
+    gap: 20px;
+  }
+  .desktop-nav {
+    gap: 20px;
+  }
+  .desktop-nav a {
+    font-size: 11px;
+  }
+  .header-actions {
+    gap: 15px;
+  }
+  .network-indicator {
+    display: none;
+  }
+  .main-container {
+    padding: 0 30px;
+  }
+  .landing-hero {
+    gap: 38px;
+    padding: 55px 0;
+    min-height: 560px;
+  }
+  .hero-copy h1 {
+    font-size: 55px;
+    letter-spacing: -2.7px;
+  }
+  .hero-description {
+    font-size: 12px;
+  }
+  .hero-composition {
+    min-height: 420px;
+  }
+  .hero-token-note {
+    left: -22px;
+    top: 210px;
+    padding: 12px;
+  }
+  .hero-token-note strong {
+    font-size: 11px;
+  }
+  .hero-property-note {
+    left: 18px;
+    right: 18px;
+    padding: 19px;
+  }
+  .hero-property-note strong {
+    font-size: 15px;
+  }
+  .hero-property-note .eyebrow {
+    font-size: 11px;
+  }
+  .hero-actions .button {
+    font-size: 11px;
+    padding: 14px 18px;
+  }
+  .hero-disclosure {
+    font-size: 11px;
+  }
+  .principles-strip {
+    gap: 13px;
+  }
+  .principles-strip > div {
+    font-size: 11px;
+    gap: 7px;
+  }
+  .journey-section {
+    gap: 45px;
+    padding: 43px 35px;
+  }
+  .journey-intro h2 {
+    font-size: 38px;
+  }
+  .property-grid {
+    gap: 18px;
+  }
+  .property-card-body {
+    padding: 19px;
+  }
+  .title-button {
+    font-size: 16px;
+  }
+  .card-foot {
+    gap: 7px;
+  }
+  .card-foot .text-button {
+    font-size: 11px;
+  }
+  .card-foot > span {
+    font-size: 11px;
+  }
+  .education-grid {
+    gap: 17px;
+  }
+  .education-grid article {
+    padding: 24px;
+  }
+  .education-grid h3 {
+    font-size: 14px;
+  }
+  .admin-container {
+    padding: 0 28px;
+  }
+  .admin-workspace {
+    grid-template-columns: 185px minmax(0, 1fr);
+    gap: 25px;
+  }
+  .admin-sidebar {
+    padding-right: 20px;
+  }
+  .admin-main .page-heading h1 {
+    font-size: 28px;
+  }
+  .admin-stats {
+    gap: 12px;
+  }
+  .admin-stats .stat-card {
+    padding: 18px;
+  }
+  .admin-stats .stat-value {
+    font-size: 25px;
+  }
+  .admin-stats .stat-label {
+    font-size: 11px;
+  }
+  .admin-form-layout {
+    grid-template-columns: minmax(0, 1.7fr) minmax(150px, 1fr);
+    gap: 20px;
+  }
+  .admin-form-aside p {
+    font-size: 11px;
+  }
+  .detail-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(290px, 1fr);
+    gap: 22px;
+  }
+  .purchase-panel {
+    padding: 23px;
+  }
+  .portfolio-bottom {
+    gap: 20px;
+  }
+  .stat-value {
+    font-size: 30px;
+  }
+  .footer-top {
+    gap: 35px;
+  }
+  .footer-links {
+    gap: 35px;
+  }
+}
+@media (max-width: 900px) {
+  .desktop-nav {
+    gap: 16px;
+  }
+  .desktop-nav a {
+    font-size: 11px;
+  }
+  .header-inner {
+    gap: 16px;
+  }
+  .brand {
+    font-size: 21px;
+  }
+  .header-actions > .button {
+    font-size: 11px;
+    padding: 11px 13px;
+    min-height: 41px;
+  }
+  .connected-wallet .wallet-avatar {
+    display: none;
+  }
+  .hero-copy h1 {
+    font-size: 47px;
+    letter-spacing: -2.1px;
+  }
+  .hero-copy .eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+  }
+  .hero-composition {
+    min-height: 390px;
+  }
+  .hero-token-note {
+    top: 180px;
+    left: -15px;
+    gap: 8px;
+    padding: 10px;
+  }
+  .token-note-icon {
+    width: 29px;
+    height: 29px;
+  }
+  .hero-token-note strong {
+    font-size: 11px;
+  }
+  .hero-token-note > div > span {
+    font-size: 11px;
+  }
+  .hero-property-note {
+    bottom: 15px;
+    left: 12px;
+    right: 12px;
+    padding: 17px;
+  }
+  .hero-property-note strong {
+    font-size: 13px;
+  }
+  .hero-property-note > div > span:last-child {
+    font-size: 11px;
+  }
+  .hero-image-label {
+    font-size: 11px;
+    right: 16px;
+    top: 23px;
+    padding: 6px 8px;
+  }
+  .hero-property-note .eyebrow {
+    font-size: 11px;
+  }
+  .hero-disclosure {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .hero-description {
+    font-size: 11px;
+  }
+  .hero-actions {
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  .hero-actions .button {
+    font-size: 11px;
+    padding: 13px 14px;
+    min-height: 45px;
+  }
+  .principles-strip {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 24px;
+    margin-bottom: 52px;
+  }
+  .landing-section h2 {
+    font-size: 28px;
+  }
+  .section-heading .button {
+    font-size: 11px;
+    padding: 11px 14px;
+  }
+  .education-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .education-grid article {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0 22px;
+    align-items: start;
+  }
+  .education-grid .education-icon {
+    grid-row: 1/4;
+    margin: 0;
+  }
+  .education-grid h3 {
+    font-size: 16px;
+  }
+  .education-grid p {
+    font-size: 11px;
+    margin-bottom: 15px;
+  }
+  .education-grid .education-tag {
+    grid-column: 2;
+  }
+  .journey-section {
+    gap: 30px;
+    padding: 35px 27px;
+  }
+  .journey-intro h2 {
+    font-size: 33px;
+  }
+  .journey-intro .eyebrow {
+    font-size: 11px;
+  }
+  .journey-steps li {
+    gap: 14px;
+  }
+  .journey-steps h3 {
+    font-size: 13px;
+  }
+  .journey-steps p {
+    font-size: 11px;
+  }
+  .step-icon {
+    width: 39px;
+    height: 39px;
+  }
+  .property-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+  .property-card-body {
+    padding: 23px;
+  }
+  .title-button {
+    font-size: 18px;
+  }
+  .card-foot .text-button {
+    font-size: 11px;
+  }
+  .card-foot > span {
+    font-size: 11px;
+  }
+  .closing-cta {
+    padding: 37px 30px;
+  }
+  .closing-cta h2 {
+    font-size: 31px;
+  }
+  .closing-cta .button {
+    font-size: 11px;
+    padding: 14px 18px;
+  }
+  .closing-cta p:last-child {
+    font-size: 11px;
+  }
+  .admin-workspace {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .admin-sidebar {
+    padding: 25px 0 0;
+    border-right: 0;
+  }
+  .workspace-label,
+  .admin-wallet-note {
+    display: none;
+  }
+  .admin-sidebar nav {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-sidebar nav button {
+    font-size: 11px;
+    padding: 10px 13px;
+  }
+  .admin-sidebar nav button .icon:last-child:not(:first-child) {
+    display: none;
+  }
+  .admin-main {
+    padding-top: 28px;
+  }
+  .admin-main .page-heading h1 {
+    font-size: 32px;
+  }
+  .admin-stats .stat-value {
+    font-size: 30px;
+  }
+  .admin-main .page-description {
+    font-size: 11px;
+  }
+  .detail-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 1fr);
+    gap: 18px;
+  }
+  .detail-section {
+    padding: 23px;
+  }
+  .detail-section h2 {
+    font-size: 20px;
+  }
+  .detail-section > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .research-nav {
+    gap: 20px;
+  }
+  .facts dd {
+    font-size: 19px;
+  }
+  .property-facts {
+    gap: 14px;
+  }
+  .property-facts strong {
+    font-size: 11px;
+  }
+  .purchase-panel {
+    padding: 22px;
+  }
+  .purchase-panel-top .eyebrow {
+    font-size: 11px;
+  }
+  .detail-price {
+    font-size: 34px;
+  }
+  .portfolio-stats {
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 15px;
+  }
+  .stat-card {
+    padding: 22px;
+  }
+  .stat-label {
+    font-size: 11px;
+  }
+  .stat-value {
+    font-size: 28px;
+  }
+  .stat-card > p {
+    font-size: 11px;
+  }
+  .portfolio-bottom {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .panel {
+    padding: 24px;
+  }
+  .holding-body {
+    padding: 19px;
+  }
+  .holding-title {
+    flex-wrap: wrap;
+  }
+  .holding-title h3 {
+    font-size: 16px;
+  }
+  .holding-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .holding-facts > div:last-child {
+    grid-column: 1/-1;
+  }
+  .holding-facts dd {
+    font-size: 18px;
+  }
+  .activity-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .activity-heading > span {
+    font-size: 11px;
+  }
+  .activity-heading strong {
+    font-size: 11px;
+  }
+  .activity-heading small {
+    display: none;
+  }
+  .allocation-content {
+    gap: 32px;
+  }
+  .footer-top {
+    grid-template-columns: 1fr 1.5fr;
+    gap: 35px;
+  }
+  .footer-note {
+    grid-column: 1/-1;
+    max-width: 600px;
+  }
+  .footer-note p {
+    font-size: 11px;
+  }
+  .footer-top {
+    padding-bottom: 30px;
+  }
+}
+@media (max-width: 700px) {
+  html {
+    scroll-padding-top: 90px;
+  }
+  .header-inner {
+    padding: 14px 22px;
+    min-height: 75px;
+  }
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: inline-flex;
+    margin-left: 2px;
+  }
+  .mobile-nav {
+    display: grid;
+    border-top: 1px solid var(--line);
+    padding: 8px 22px 17px;
+    background: #fff;
+  }
+  .mobile-nav a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 11px;
+    border-radius: 6px;
+    color: #5c705f;
+    text-decoration: none;
+    font-size: 12px;
+  }
+  .mobile-nav a[aria-current] {
+    background: #f0f5eb;
+    color: var(--green);
+    font-weight: 650;
+  }
+  .header-actions {
+    gap: 10px;
+  }
+  .hero-copy h1 {
+    font-size: 53px;
+    letter-spacing: -2.3px;
+  }
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 43px 0 34px;
+  }
+  .hero-copy {
+    max-width: 560px;
+  }
+  .hero-description {
+    font-size: 13px;
+    max-width: 480px;
+  }
+  .hero-copy .eyebrow {
+    font-size: 11px;
+    margin-bottom: 20px;
+  }
+  .hero-actions {
+    gap: 12px;
+  }
+  .hero-actions .button {
+    font-size: 12px;
+    padding: 14px 20px;
+    min-height: 49px;
+  }
+  .hero-disclosure {
+    font-size: 11px;
+    margin-top: 23px;
+  }
+  .hero-composition {
+    min-height: 450px;
+    max-width: 530px;
+    margin: 0 auto;
+  }
+  .hero-architecture {
+    border-top-left-radius: 110px;
+    bottom: 52px;
+  }
+  .hero-art-backdrop {
+    border-top-left-radius: 110px;
+  }
+  .hero-token-note {
+    left: -12px;
+    top: 214px;
+    padding: 15px;
+  }
+  .hero-token-note strong {
+    font-size: 11px;
+  }
+  .hero-token-note > div > span {
+    font-size: 11px;
+  }
+  .token-note-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .hero-property-note {
+    bottom: 20px;
+    left: 22px;
+    right: 22px;
+    padding: 22px;
+  }
+  .hero-property-note strong {
+    font-size: 17px;
+  }
+  .hero-property-note .eyebrow {
+    font-size: 11px;
+  }
+  .hero-property-note > div > span:last-child {
+    font-size: 11px;
+  }
+  .hero-image-label {
+    font-size: 11px;
+    right: 22px;
+    top: 28px;
+    padding: 8px 11px;
+  }
+  .main-container {
+    padding: 0 24px;
+  }
+  .principles-strip {
+    padding: 26px 0;
+    margin-bottom: 48px;
+  }
+  .principles-strip > div {
+    font-size: 11px;
+    justify-content: flex-start;
+    padding-left: 7px;
+  }
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .landing-section h2 {
+    font-size: 28px;
+  }
+  .section-description {
+    font-size: 12px;
+  }
+  .landing-section {
+    padding-bottom: 48px;
+  }
+  .journey-section {
+    grid-template-columns: 1fr;
+    padding: 32px 27px;
+    gap: 30px;
+    margin-bottom: 50px;
+  }
+  .journey-intro h2 {
+    font-size: 35px;
+  }
+  .journey-intro h2 br {
+    display: none;
+  }
+  .journey-intro > p:not(.eyebrow) {
+    max-width: none;
+    font-size: 12px;
+  }
+  .journey-steps h3 {
+    font-size: 14px;
+  }
+  .journey-steps p {
+    font-size: 11px;
+  }
+  .journey-steps li {
+    gap: 16px;
+  }
+  .education-section {
+    padding-bottom: 48px;
+  }
+  .education-heading h2 {
+    font-size: 29px;
+  }
+  .education-heading > p:last-child {
+    font-size: 12px;
+  }
+  .education-grid article {
+    padding: 24px;
+    gap: 0 17px;
+  }
+  .closing-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 48px;
+    padding: 32px;
+  }
+  .closing-cta .eyebrow {
+    font-size: 11px;
+  }
+  .closing-cta h2 {
+    font-size: 34px;
+  }
+  .closing-cta p:last-child {
+    font-size: 11px;
+  }
+  .page {
+    padding: 35px 0 48px;
+  }
+  .page-heading {
+    align-items: flex-start;
+    gap: 20px;
+    flex-direction: column;
+    margin-bottom: 26px;
+  }
+  .page-heading h1 {
+    font-size: 36px;
+    letter-spacing: -1.4px;
+  }
+  .page-description {
+    font-size: 12px;
+  }
+  .catalog-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 13px;
+  }
+  .catalog-toolbar > p {
+    font-size: 11px;
+  }
+  .segmented {
+    width: 100%;
+    justify-content: center;
+  }
+  .segmented button {
+    flex: 1;
+    padding: 10px 15px;
+    font-size: 11px;
+  }
+  .filter-bar,
+  .filter-bar:has(.filter-reset) {
+    grid-template-columns: 1fr 1fr;
+    gap: 11px;
+  }
+  .search-field {
+    grid-column: 1/-1;
+  }
+  .filter-bar input,
+  .filter-bar select {
+    font-size: 11px;
+  }
+  .filter-reset {
+    grid-column: 1/-1;
+    justify-self: end;
+    min-height: 28px;
+    padding: 0;
+  }
+  .property-grid {
+    gap: 17px;
+  }
+  .property-card-body {
+    padding: 18px;
+  }
+  .title-button {
+    font-size: 16px;
+  }
+  .property-location {
+    font-size: 11px;
+  }
+  .price-line {
+    gap: 5px;
+  }
+  .price-line > strong {
+    font-size: 23px;
+  }
+  .price-line > span {
+    font-size: 11px;
+  }
+  .card-foot {
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .card-foot > span {
+    font-size: 11px;
+  }
+  .card-foot .text-button {
+    font-size: 11px;
+  }
+  .card-badges {
+    top: 11px;
+    left: 11px;
+    right: 11px;
+    gap: 5px;
+  }
+  .card-badges .badge {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+  .image-caption {
+    font-size: 11px;
+    bottom: 8px;
+    right: 8px;
+  }
+  .result-heading > span {
+    display: none;
+  }
+  .result-heading p {
+    font-size: 11px;
+  }
+  .notice {
+    padding: 14px;
+    font-size: 11px;
+    gap: 9px;
+  }
+  .notice > div > strong {
+    font-size: 11px;
+  }
+  .notice .button {
+    font-size: 11px;
+    max-width: 110px;
+    padding: 8px;
+  }
+  .empty-state {
+    padding: 45px 22px;
+  }
+  .empty-state h2 {
+    font-size: 23px;
+  }
+  .empty-description {
+    font-size: 11px;
+  }
+  .empty-actions .button {
+    font-size: 11px;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .purchase-panel {
+    position: static;
+    grid-row: auto;
+  }
+  .research-content {
+    grid-row: 1;
+  }
+  .detail-page .page-heading {
+    gap: 15px;
+  }
+  .detail-page .page-heading h1 {
+    font-size: 33px;
+  }
+  .detail-image .property-art {
+    aspect-ratio: 1.6;
+  }
+  .detail-section {
+    padding: 24px;
+  }
+  .detail-section h2 {
+    font-size: 23px;
+  }
+  .detail-section > p:not(.eyebrow) {
+    font-size: 12px;
+  }
+  .property-facts strong {
+    font-size: 11px;
+  }
+  .facts dd {
+    font-size: 23px;
+  }
+  .purchase-panel {
+    padding: 26px;
+  }
+  .purchase-panel-top .eyebrow {
+    font-size: 11px;
+  }
+  .detail-price {
+    font-size: 42px;
+  }
+  .purchase-panel .small {
+    font-size: 11px;
+  }
+  .available-summary {
+    font-size: 11px;
+  }
+  .purchase-summary > div {
+    font-size: 11px;
+  }
+  .purchase-help {
+    font-size: 11px;
+  }
+  .purchase-panel .risk-note p {
+    font-size: 11px;
+  }
+  .research-nav {
+    gap: 25px;
+    font-size: 11px;
+  }
+  .portfolio-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .portfolio-stats .stat-card:first-child {
+    grid-column: 1/-1;
+  }
+  .stat-value {
+    font-size: 30px;
+  }
+  .stat-card.accent .stat-value {
+    font-size: 37px;
+  }
+  .stat-label {
+    font-size: 11px;
+  }
+  .stat-card > p {
+    font-size: 11px;
+  }
+  .allocation-content {
+    gap: 23px;
+    padding: 12px 0 23px;
+  }
+  .allocation-chart {
+    width: 155px;
+    height: 155px;
+  }
+  .allocation-legend {
+    gap: 18px;
+  }
+  .allocation-legend li {
+    font-size: 11px;
+    gap: 8px;
+  }
+  .allocation-legend strong {
+    font-size: 11px;
+  }
+  .allocation-chart strong {
+    font-size: 27px;
+  }
+  .allocation-chart span {
+    font-size: 11px;
+  }
+  .holdings-grid {
+    grid-template-columns: 1fr;
+  }
+  .holding-image .property-art {
+    aspect-ratio: 2.7;
+  }
+  .holding-body {
+    padding: 23px;
+  }
+  .holding-title {
+    flex-wrap: nowrap;
+  }
+  .holding-title h3 {
+    font-size: 17px;
+  }
+  .holding-facts {
+    grid-template-columns: 1fr 1fr 1.4fr;
+    gap: 15px;
+  }
+  .holding-facts > div:last-child {
+    grid-column: auto;
+  }
+  .holding-facts dd {
+    font-size: 19px;
+  }
+  .portfolio-bottom {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .activity-heading strong {
+    font-size: 11px;
+  }
+  .activity-heading > span {
+    font-size: 12px;
+  }
+  .activity-heading small {
+    display: inline;
+  }
+  .activity-body p {
+    font-size: 11px;
+  }
+  .activity-panel .section-title p,
+  .transfer-panel .section-title p {
+    font-size: 11px;
+  }
+  .admin-workspace {
+    padding-bottom: 48px;
+  }
+  .admin-main {
+    padding-top: 24px;
+  }
+  .admin-sidebar nav {
+    gap: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-sidebar nav button {
+    font-size: 11px;
+    padding: 12px;
+  }
+  .admin-main .page-heading h1 {
+    font-size: 31px;
+  }
+  .admin-main .eyebrow {
+    font-size: 11px;
+  }
+  .admin-main .page-description {
+    font-size: 11px;
+  }
+  .admin-main .page-heading {
+    align-items: flex-start;
+  }
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+  }
+  .admin-stats .stat-card:last-child {
+    grid-column: 1/-1;
+  }
+  .admin-stats .stat-label {
+    font-size: 11px;
+  }
+  .admin-stats .stat-value {
+    font-size: 31px;
+  }
+  .admin-quick-action {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 21px;
+  }
+  .admin-quick-action h2 {
+    font-size: 13px;
+  }
+  .admin-quick-action p {
+    font-size: 11px;
+  }
+  .admin-quick-action > .button {
+    font-size: 11px;
+  }
+  .admin-form-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .admin-form-aside {
+    padding: 22px;
+  }
+  .admin-form-aside p {
+    font-size: 11px;
+  }
+  .admin-form-aside h3 {
+    font-size: 14px;
+  }
+  .admin-form-aside .education-icon {
+    margin-bottom: 18px;
+  }
+  .admin-listings .section-title {
+    padding: 22px 20px 0;
+  }
+  .admin-listings .section-title h2 {
+    font-size: 17px;
+  }
+  .admin-listings .section-title p {
+    font-size: 11px;
+  }
+  .table-property strong {
+    font-size: 11px;
+  }
+  .table-footnote {
+    font-size: 11px;
+    padding: 17px 20px;
+  }
+  .create-property-panel {
+    padding: 24px;
+  }
+  .treasury-panel {
+    padding: 27px;
+  }
+  .treasury-amount {
+    font-size: 43px;
+  }
+  .site-footer {
+    padding: 35px 24px 0;
+  }
+  .footer-top {
+    gap: 30px;
+    grid-template-columns: 1fr;
+  }
+  .footer-links {
+    gap: 55px;
+    padding: 0;
+  }
+  .footer-note {
+    grid-column: auto;
+    max-width: 450px;
+    padding: 0;
+  }
+  .footer-links a {
+    font-size: 11px;
+  }
+  .footer-links span {
+    font-size: 11px;
+  }
+  .footer-top > div:first-child > p {
+    font-size: 11px;
+  }
+  .footer-note p {
+    font-size: 11px;
+  }
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 11px;
+  }
+  .demo-strip {
+    font-size: 11px;
+    gap: 9px;
+    height: 30px;
+  }
+  .demo-strip-detail {
+    display: none;
+  }
+}
+@media (max-width: 450px) {
+  .main-container {
+    padding: 0 20px;
+  }
+  .header-inner {
+    padding: 13px 16px;
+    gap: 12px;
+  }
+  .brand {
+    font-size: 21px;
+    gap: 7px;
+  }
+  .brand-mark svg {
+    width: 22px;
+    height: 25px;
+  }
+  .brand-period {
+    margin-left: -8px;
+  }
+  .header-actions {
+    gap: 5px;
+  }
+  .header-actions > .button {
+    padding: 10px 11px;
+    font-size: 11px;
+    gap: 7px;
+    min-height: 39px;
+  }
+  .header-actions > .button .icon {
+    width: 15px;
+  }
+  .mobile-menu-toggle {
+    min-width: 31px;
+    min-height: 34px;
+    padding: 5px;
+  }
+  .connected-wallet {
+    padding: 4px 5px;
+    gap: 5px;
+  }
+  .connected-wallet small {
+    font-size: 11px;
+  }
+  .connected-wallet strong {
+    font-size: 11px;
+  }
+  .connected-wallet .icon-button {
+    min-width: 29px;
+    min-height: 29px;
+    padding: 5px;
+  }
+  .mobile-nav {
+    padding: 6px 16px 14px;
+  }
+  .landing-hero {
+    padding: 37px 0 32px;
+    gap: 30px;
+  }
+  .hero-copy h1 {
+    font-size: 46px;
+    letter-spacing: -2.2px;
+    margin-bottom: 22px;
+  }
+  .hero-copy .eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+  }
+  .hero-description {
+    font-size: 12px;
+    line-height: 1.95;
+    margin-bottom: 23px;
+  }
+  .hero-actions {
+    gap: 6px;
+  }
+  .hero-actions .button {
+    font-size: 11px;
+    padding: 13px 16px;
+  }
+  .hero-actions .text {
+    padding: 12px;
+  }
+  .hero-disclosure {
+    font-size: 11px;
+    gap: 6px;
+    line-height: 1.8;
+    margin-top: 21px;
+  }
+  .hero-composition {
+    min-height: 362px;
+  }
+  .hero-architecture {
+    inset: 0 0 45px;
+    border-top-left-radius: 100px;
+  }
+  .hero-art-backdrop {
+    border-top-left-radius: 100px;
+  }
+  .hero-image-label {
+    font-size: 11px;
+    padding: 6px 9px;
+    top: 21px;
+    right: 15px;
+  }
+  .hero-token-note {
+    top: 168px;
+    left: -7px;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .hero-token-note strong {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+  .hero-token-note > div > span {
+    font-size: 11px;
+  }
+  .token-note-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .token-note-icon .icon {
+    width: 18px;
+  }
+  .hero-property-note {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 18px;
+    gap: 8px;
+  }
+  .hero-property-note strong {
+    font-size: 14px;
+    margin-bottom: 7px;
+  }
+  .hero-property-note .eyebrow {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .hero-property-note > div > span:last-child {
+    font-size: 11px;
+  }
+  .hero-architecture .image-caption {
+    bottom: 30px;
+    font-size: 11px;
+    right: 12px;
+  }
+  .hero-property-note .circle-link {
+    width: 31px;
+    height: 31px;
+  }
+  .principles-strip {
+    gap: 21px 12px;
+    margin-bottom: 43px;
+  }
+  .principles-strip > div {
+    font-size: 11px;
+    gap: 6px;
+    padding: 0;
+  }
+  .principles-strip > div .icon {
+    width: 16px;
+  }
+  .landing-section h2 {
+    font-size: 27px;
+  }
+  .section-description {
+    font-size: 11px;
+  }
+  .section-heading .eyebrow {
+    font-size: 11px;
+  }
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 23px;
+  }
+  .property-card-body {
+    padding: 23px;
+  }
+  .title-button {
+    font-size: 20px;
+  }
+  .property-location {
+    font-size: 11px;
+  }
+  .price-line > strong {
+    font-size: 27px;
+  }
+  .price-line > span {
+    font-size: 11px;
+  }
+  .card-foot {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .card-foot > span {
+    font-size: 11px;
+  }
+  .card-foot .text-button {
+    font-size: 11px;
+  }
+  .card-badges {
+    top: 15px;
+    left: 15px;
+    right: 15px;
+  }
+  .card-badges .badge {
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+  .image-caption {
+    font-size: 11px;
+    bottom: 11px;
+    right: 11px;
+  }
+  .progress-label {
+    font-size: 11px;
+  }
+  .journey-section {
+    padding: 28px 23px;
+  }
+  .journey-intro h2 {
+    font-size: 32px;
+  }
+  .journey-intro .eyebrow {
+    font-size: 11px;
+  }
+  .journey-intro > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .journey-steps h3 {
+    font-size: 13px;
+  }
+  .journey-steps p {
+    font-size: 11px;
+  }
+  .step-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .step-icon .icon {
+    width: 19px;
+  }
+  .journey-steps li {
+    gap: 13px;
+  }
+  .education-heading h2 {
+    font-size: 28px;
+  }
+  .education-heading .eyebrow {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .education-grid article {
+    padding: 23px;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .education-grid .education-icon {
+    grid-row: auto;
+    margin-bottom: 22px;
+  }
+  .education-grid .education-tag {
+    grid-column: auto;
+  }
+  .education-grid p {
+    font-size: 11px;
+  }
+  .closing-cta {
+    padding: 29px 25px;
+  }
+  .closing-cta h2 {
+    font-size: 32px;
+  }
+  .closing-cta .eyebrow {
+    font-size: 11px;
+    line-height: 1.9;
+  }
+  .closing-cta p:last-child {
+    font-size: 11px;
+  }
+  .empty-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 260px;
+  }
+  .notice {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .notice > div > strong {
+    font-size: 11px;
+  }
+  .notice .button {
+    font-size: 11px;
+    max-width: 90px;
+  }
+  .notice .icon-button {
+    min-width: 24px;
+    padding: 4px;
+  }
+  .notice > .icon {
+    width: 16px;
+  }
+  .page-heading h1 {
+    font-size: 33px;
+  }
+  .page-description {
+    font-size: 11px;
+  }
+  .page-actions .button {
+    font-size: 11px;
+  }
+  .page-heading .eyebrow {
+    font-size: 11px;
+  }
+  .detail-page .page-heading h1 {
+    font-size: 31px;
+  }
+  .research-nav {
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .research-nav a {
+    font-size: 11px;
+  }
+  .detail-section {
+    padding: 23px;
+  }
+  .detail-section h2 {
+    font-size: 21px;
+  }
+  .detail-section > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .property-facts {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .facts dd {
+    font-size: 21px;
+  }
+  .facts {
+    gap: 23px 17px;
+  }
+  .facts dt {
+    font-size: 11px;
+  }
+  .purchase-panel {
+    padding: 24px;
+  }
+  .detail-price {
+    font-size: 39px;
+  }
+  .detail-section .section-title h2 {
+    font-size: 20px;
+  }
+  .document-list a > span:nth-child(2) {
+    font-size: 11px;
+  }
+  .document-list small {
+    font-size: 11px;
+  }
+  .stat-card {
+    padding: 21px;
+  }
+  .stat-label {
+    font-size: 11px;
+    margin-bottom: 17px;
+  }
+  .stat-value {
+    font-size: 29px;
+  }
+  .stat-card > p {
+    font-size: 11px;
+  }
+  .stat-card.accent .stat-value {
+    font-size: 34px;
+  }
+  .portfolio-stats {
+    gap: 13px;
+  }
+  .allocation-panel {
+    padding: 23px;
+  }
+  .allocation-panel .section-title {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .allocation-content {
+    flex-direction: column;
+    gap: 21px;
+    padding: 10px 0 24px;
+  }
+  .allocation-chart {
+    height: 160px;
+    width: 160px;
+  }
+  .allocation-legend {
+    gap: 17px;
+    max-width: 300px;
+  }
+  .allocation-legend li,
+  .allocation-legend strong {
+    font-size: 11px;
+  }
+  .footnote {
+    font-size: 11px;
+  }
+  .holdings-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .holdings-heading h2 {
+    font-size: 24px;
+  }
+  .source-label {
+    font-size: 11px;
+  }
+  .holding-title {
+    flex-wrap: wrap;
+  }
+  .holding-title h3 {
+    font-size: 18px;
+  }
+  .holding-facts dd {
+    font-size: 17px;
+  }
+  .holding-facts dt {
+    font-size: 11px;
+  }
+  .holding-facts {
+    gap: 11px;
+  }
+  .holding-body {
+    padding: 22px;
+  }
+  .activity-heading strong {
+    font-size: 11px;
+  }
+  .activity-heading > span {
+    font-size: 11px;
+  }
+  .activity-heading small {
+    font-size: 11px;
+  }
+  .activity-list li {
+    gap: 10px;
+  }
+  .activity-icon {
+    width: 31px;
+    height: 31px;
+  }
+  .activity-body p {
+    font-size: 11px;
+  }
+  .activity-panel,
+  .transfer-panel {
+    padding: 23px;
+  }
+  .form-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .admin-stats {
+    gap: 12px;
+  }
+  .admin-stats .stat-card {
+    padding: 19px;
+  }
+  .admin-stats .stat-label {
+    font-size: 11px;
+  }
+  .admin-sidebar nav button {
+    font-size: 11px;
+    padding: 10px;
+  }
+  .admin-main .page-heading h1 {
+    font-size: 30px;
+  }
+  .admin-quick-action > div {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .admin-quick-action .section-icon {
+    width: 33px;
+    height: 33px;
+  }
+  .admin-quick-action h2 {
+    font-size: 12px;
+  }
+  .admin-quick-action p {
+    font-size: 11px;
+  }
+  .create-property-panel {
+    padding: 23px;
+  }
+  .treasury-panel {
+    padding: 25px;
+  }
+  .treasury-amount {
+    font-size: 38px;
+    gap: 8px;
+  }
+  .treasury-amount span {
+    font-size: 17px;
+  }
+  .transaction-dialog {
+    padding: 25px;
+    width: calc(100% - 28px);
+    border-radius: 16px;
+    max-height: calc(100dvh - 32px);
+  }
+  .transaction-dialog h2 {
+    font-size: 25px;
+  }
+  .transaction-dialog > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .dialog-actions {
+    gap: 8px;
+  }
+  .dialog-actions .button {
+    font-size: 11px;
+    padding: 12px 15px;
+  }
+  .review-list > div {
+    font-size: 11px;
+    gap: 13px;
+  }
+  .review-list dt {
+    flex-shrink: 1;
+  }
+  .review-list dd {
+    max-width: 62%;
+  }
+  .review-network {
+    font-size: 11px;
+    gap: 5px;
+  }
+  .review-network .badge {
+    font-size: 11px;
+  }
+  .confirmation-check {
+    font-size: 11px;
+  }
+  .transaction-status {
+    bottom: 16px;
+    right: 16px;
+    padding: 21px;
+  }
+  .transaction-status h2 {
+    font-size: 12px;
+  }
+  .transaction-status-heading > div > span {
+    font-size: 11px;
+  }
+  .transaction-status p {
+    font-size: 11px;
+  }
+  .site-footer {
+    padding: 35px 20px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .header-actions > .button,
+  .mobile-menu-toggle {
+    min-height: 44px;
+  }
+  .mobile-menu-toggle {
+    min-width: 40px;
+  }
+}
+@media (max-width: 450px) {
+  .connected-wallet small {
+    display: none;
+  }
+  .connected-wallet strong {
+    font-size: 11px;
+  }
+}
