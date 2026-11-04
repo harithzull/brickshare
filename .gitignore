@@ -1,0 +1,31 @@
+# Dependencies and local secrets (at any depth)
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+
+# Frontend build output and machine-specific deployment metadata
+dist/
+/react-frontend/src/generated/deployment.json
+
+# Hardhat files
+/cache
+/artifacts
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

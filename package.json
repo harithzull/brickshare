@@ -1,0 +1,25 @@
+{
+  "name": "brickshare",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local real estate tokenization demo with Solidity and React",
+  "engines": {
+    "node": ">=22.19.0 <23"
+  },
+  "scripts": {
+    "setup": "npm ci && npm ci --prefix react-frontend",
+    "compile": "hardhat compile && node scripts/sync-frontend.js",
+    "test": "hardhat test",
+    "test:frontend": "npm --prefix react-frontend test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "dev": "npm --prefix react-frontend run dev",
+    "build": "npm --prefix react-frontend run build",
+    "preview": "npm --prefix react-frontend run preview"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "hardhat": "^2.22.19",
+    "hardhat-gas-reporter": "^2.3.0"
+  }
+}

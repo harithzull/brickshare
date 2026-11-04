@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BrickShare — Real Estate Tokenization</title>
+
+<!-- ethers.js v5 loaded from CDN. No install needed. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<!-- Our config file (contract address + ABI) -->
+<script src="config.js"></script>
+
+<style>
+  :root {
+    --bg: #0e1a24;
+    --panel: #14242f;
+    --panel-2: #1b2f3c;
+    --line: #284455;
+    --ink: #eaf2f6;
+    --muted: #8fa9b8;
+    --brass: #c8943f;
+    --brass-soft: #e0b766;
+    --ok: #4cc38a;
+    --warn: #e0a52e;
+    --err: #e2615a;
+    --pending: #5aa9e0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 {
+    font-size: 22px; margin: 0; letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .brand .tag { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+  .wallet-box { display: flex; align-items: center; gap: 12px; }
+  .addr {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px; color: var(--brass-soft);
+    background: var(--panel-2); border: 1px solid var(--line);
+    padding: 7px 12px; border-radius: 8px;
+  }
+  .role-pill {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .role-pill.owner { color: var(--brass-soft); border-color: var(--brass); }
+  button {
+    font: inherit; cursor: pointer; border: none; border-radius: 8px;
+    padding: 10px 16px; font-weight: 600; transition: opacity .15s, transform .05s;
+  }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--brass); color: #1a1205; }
+  .btn-primary:hover:not(:disabled) { background: var(--brass-soft); }
+  .btn-ghost { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 28px 60px; }
+
+  /* Network / status banner */
+  #netBanner {
+    display: none; margin-bottom: 18px; padding: 12px 16px;
+    border-radius: 10px; font-size: 14px;
+    border: 1px solid var(--warn); background: rgba(224,165,46,0.12); color: var(--warn);
+  }
+  #netBanner.show { display: block; }
+
+  /* Toast / transaction status */
+  #toast {
+    position: fixed; right: 20px; bottom: 20px; max-width: 360px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px; font-size: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    display: none; z-index: 50;
+  }
+  #toast.show { display: block; }
+  #toast .t-title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  #toast .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  #toast.pending .dot { background: var(--pending); animation: pulse 1s infinite; }
+  #toast.ok .dot { background: var(--ok); }
+  #toast.err .dot { background: var(--err); }
+  #toast .t-body { color: var(--muted); word-break: break-word; }
+  #toast a { color: var(--brass-soft); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px;
+  }
+  .card h2 {
+    margin: 0 0 4px; font-size: 16px; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card .hint { color: var(--muted); font-size: 12px; margin: 0 0 16px; }
+  .owner-only-note { color: var(--brass-soft); font-size: 11px; }
+
+  label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; text-transform: uppercase; letter-spacing: .5px; }
+  input {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); font: inherit;
+  }
+  input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+
+  .full { grid-column: 1 / -1; }
+
+  /* Property listings */
+  .props-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .prop {
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; background: var(--panel-2);
+  }
+  .prop-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+  .prop-name { font-size: 17px; font-weight: 700; margin: 0; }
+  .prop-loc { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 999px; letter-spacing: .5px; }
+  .badge.active { background: rgba(76,195,138,.15); color: var(--ok); border: 1px solid var(--ok); }
+  .badge.inactive { background: rgba(226,97,90,.12); color: var(--err); border: 1px solid var(--err); }
+  .prop-stats { display: flex; gap: 22px; margin-top: 12px; flex-wrap: wrap; }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .stat .v { font-size: 16px; font-weight: 700; }
+  .stat .v.mine { color: var(--brass-soft); }
+  .empty { color: var(--muted); text-align: center; padding: 28px 10px; font-size: 14px; }
+  .id-chip { font-family: ui-monospace, monospace; font-size: 12px; color: var(--brass-soft); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>BrickShare</h1>
+    <span class="tag">Fractional property on-chain</span>
+  </div>
+  <div class="wallet-box">
+    <span id="rolePill" class="role-pill" style="display:none;">investor</span>
+    <span id="walletAddr" class="addr" style="display:none;"></span>
+    <button id="connectBtn" class="btn-primary">Connect MetaMask</button>
+  </div>
+</header>
+
+<main>
+  <div id="netBanner"></div>
+
+  <!-- LISTINGS -->
+  <section class="card full" style="margin-bottom:18px;">
+    <div class="props-head">
+      <div>
+        <h2>Property listings</h2>
+        <p class="hint" style="margin:0;">Live data read from the contract. Your own token holdings are highlighted.</p>
+      </div>
+      <button id="refreshBtn" class="btn-ghost" disabled>Refresh</button>
+    </div>
+    <div id="propList"><p class="empty">Connect your wallet to load properties.</p></div>
+  </section>
+
+  <div class="grid">
+    <!-- ADD PROPERTY (owner only) -->
+    <section class="card">
+      <h2>Add property <span class="owner-only-note" id="addOwnerNote" style="display:none;">· owner only</span></h2>
+      <p class="hint">Lists a new property and mints its tokens. Only the contract owner can do this.</p>
+      <label for="pName">Property name</label>
+      <input id="pName" placeholder="e.g. Marina Bay Residences" />
+      <label for="pLoc">Location</label>
+      <input id="pLoc" placeholder="e.g. Kuala Lumpur, MY" />
+      <label for="pTotal">Total tokens</label>
+      <input id="pTotal" type="number" min="1" placeholder="e.g. 1000" />
+      <label for="pPrice">Token price (in ETH)</label>
+      <input id="pPrice" type="number" min="0" step="0.0001" placeholder="e.g. 0.01" />
+      <button id="addBtn" class="btn-primary" style="margin-top:16px; width:100%;" disabled>Add property</button>
+    </section>
+
+    <!-- BUY TOKENS -->
+    <section class="card">
+      <h2>Buy tokens</h2>
+      <p class="hint">Purchase fractional ownership. You pay tokens × price in ETH.</p>
+      <label for="bId">Property ID</label>
+      <input id="bId" type="number" min="1" placeholder="e.g. 1" />
+      <label for="bAmount">Number of tokens</label>
+      <input id="bAmount" type="number" min="1" placeholder="e.g. 10" />
+      <button id="buyBtn" class="btn-primary" style="margin-top:16px; width:100%;" disabled>Buy tokens</button>
+    </section>
+
+    <!-- TRANSFER TOKENS -->
+    <section class="card">
+      <h2>Transfer tokens</h2>
+      <p class="hint">Send tokens you own to another wallet address.</p>
+      <label for="tId">Property ID</label>
+      <input id="tId" type="number" min="1" placeholder="e.g. 1" />
+      <label for="tTo">Recipient address</label>
+      <input id="tTo" placeholder="0x..." />
+      <label for="tAmount">Number of tokens</label>
+      <input id="tAmount" type="number" min="1" placeholder="e.g. 5" />
+      <button id="transferBtn" class="btn-primary" style="margin-top:16px; width:100%;" disabled>Transfer tokens</button>
+    </section>
+
+    <!-- OWNER TOOLS -->
+    <section class="card">
+      <h2>Owner tools <span class="owner-only-note" id="ownerToolsNote" style="display:none;">· owner only</span></h2>
+      <p class="hint">Withdraw the ETH collected from token sales to the owner wallet.</p>
+      <div id="contractBalLine" style="margin:8px 0 16px; font-size:14px; color:var(--muted);">
+        Contract balance: <span id="contractBal" style="color:var(--brass-soft); font-weight:700;">—</span>
+      </div>
+      <button id="withdrawBtn" class="btn-primary" style="width:100%;" disabled>Withdraw funds</button>
+    </section>
+  </div>
+</main>
+
+<div id="toast">
+  <div class="t-title"><span class="dot"></span><span id="toastTitle"></span></div>
+  <div class="t-body" id="toastBody"></div>
+</div>
+
+<script>
+/* =========================================================================
+   BrickShare front-end logic (ethers.js v5)
+   Member 4 deliverable. Talks to RealEstateTokenization.sol.
+   ========================================================================= */
+
+// ---- App state -----------------------------------------------------------
+let provider, signer, contract, userAddress, ownerAddress;
+
+// Grab elements once
+const $ = (id) => document.getElementById(id);
+const connectBtn = $("connectBtn");
+
+// ---- Toast / transaction status (rubric: pending / confirmed / failed) ----
+function toast(state, title, body, autohide) {
+  const t = $("toast");
+  t.className = "show " + state;          // state = pending | ok | err
+  $("toastTitle").textContent = title;
+  $("toastBody").innerHTML = body || "";
+  if (autohide) setTimeout(() => { t.className = ""; }, 6000);
+}
+function hideToast() { $("toast").className = ""; }
+
+// ---- Friendly error messages (rubric: no raw revert strings) -------------
+function prettyError(err) {
+  // ethers wraps revert reasons in various places; dig them out.
+  const reason =
+    err?.reason ||
+    err?.error?.message ||
+    err?.data?.message ||
+    err?.message ||
+    "Unknown error";
+  if (reason.includes("user rejected")) return "You cancelled the transaction in MetaMask.";
+  if (reason.includes("insufficient funds")) return "Your wallet doesn't have enough ETH for this.";
+  // Strip the noisy prefixes Solidity/ethers add, keep the human bit.
+  const m = reason.match(/reverted with reason string '([^']+)'/);
+  if (m) return m[1];
+  const m2 = reason.match(/execution reverted:?\s*(.*)/);
+  if (m2 && m2[1]) return m2[1];
+  return reason;
+}
+
+// ---- Connect MetaMask ----------------------------------------------------
+async function connect() {
+  if (typeof window.ethereum === "undefined") {
+    toast("err", "MetaMask not found",
+      'Install the MetaMask browser extension from <a href="https://metamask.io" target="_blank">metamask.io</a>, then reload.', true);
+    return;
+  }
+  if (typeof CONTRACT_ADDRESS === "undefined" || CONTRACT_ADDRESS === "PASTE_YOUR_CONTRACT_ADDRESS_HERE") {
+    toast("err", "Contract address missing",
+      "Open config.js and paste your deployed contract address into CONTRACT_ADDRESS.", true);
+    return;
+  }
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);   // triggers the MetaMask popup
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+    // Show wallet address (rubric requirement)
+    $("walletAddr").style.display = "inline-block";
+    $("walletAddr").textContent = short(userAddress);
+    $("walletAddr").title = userAddress;
+    connectBtn.textContent = "Connected";
+    connectBtn.disabled = true;
+
+    await checkNetwork();
+    await detectOwner();
+    enableButtons();
+    await refresh();
+
+    // React to account / network changes without a page reload
+    window.ethereum.on("accountsChanged", () => window.location.reload());
+    window.ethereum.on("chainChanged", () => window.location.reload());
+  } catch (err) {
+    toast("err", "Connection failed", prettyError(err), true);
+  }
+}
+
+// ---- Network check (rubric: warn on wrong network) -----------------------
+// Ganache default chainId = 1337 (0x539). Sepolia = 11155111 (0xaa36a7).
+// Adjust EXPECTED_CHAIN_ID to match where Member 3 deployed.
+const EXPECTED_CHAIN_ID = 31337;            // <-- set to 11155111 if you use Sepolia
+const NETWORK_NAMES = { 1337: "Ganache (localhost)", 11155111: "Sepolia testnet" };
+async function checkNetwork() {
+  const net = await provider.getNetwork();
+  const banner = $("netBanner");
+  if (net.chainId !== EXPECTED_CHAIN_ID) {
+    banner.className = "show";
+    banner.innerHTML = `⚠️ MetaMask is on chain ID <b>${net.chainId}</b>, but this dApp expects ` +
+      `<b>${NETWORK_NAMES[EXPECTED_CHAIN_ID] || EXPECTED_CHAIN_ID}</b> (chain ID ${EXPECTED_CHAIN_ID}). ` +
+      `Switch networks in MetaMask, then reload.`;
+  } else {
+    banner.className = "";
+  }
+}
+
+// ---- Detect if connected wallet is the contract owner --------------------
+async function detectOwner() {
+  try {
+    ownerAddress = await contract.owner();
+    const isOwner = ownerAddress.toLowerCase() === userAddress.toLowerCase();
+    $("rolePill").style.display = "inline-block";
+    $("rolePill").textContent = isOwner ? "owner" : "investor";
+    $("rolePill").className = "role-pill" + (isOwner ? " owner" : "");
+    // Owner-only UI cues
+    $("addOwnerNote").style.display = isOwner ? "inline" : "none";
+    $("ownerToolsNote").style.display = isOwner ? "inline" : "none";
+    $("addBtn").disabled = !isOwner;
+    $("withdrawBtn").disabled = !isOwner;
+    if (isOwner) updateContractBalance();
+  } catch (err) {
+    console.error("owner() call failed:", err);
+  }
+}
+
+function enableButtons() {
+  $("refreshBtn").disabled = false;
+  $("buyBtn").disabled = false;
+  $("transferBtn").disabled = false;
+  // add / withdraw stay gated to owner inside detectOwner()
+}
+
+// ---- Read + render all properties ----------------------------------------
+async function refresh() {
+  if (!contract) return;
+  const list = $("propList");
+  list.innerHTML = '<p class="empty">Loading properties…</p>';
+  try {
+    const count = (await contract.propertyCount()).toNumber();
+    if (count === 0) {
+      list.innerHTML = '<p class="empty">No properties listed yet. The owner can add one below.</p>';
+      return;
+    }
+    let html = "";
+    for (let i = 1; i <= count; i++) {
+      const p = await contract.getProperty(i);
+      // p = [id, name, location, totalTokens, availableTokens, tokenPrice, active]
+      const myBalance = (await contract.getTokenBalance(i, userAddress)).toString();
+      const priceEth = ethers.utils.formatEther(p[5]);
+      html += `
+        <div class="prop">
+          <div class="prop-top">
+            <div>
+              <p class="prop-name">${escapeHtml(p[1])} <span class="id-chip">#${p[0]}</span></p>
+              <p class="prop-loc">${escapeHtml(p[2])}</p>
+            </div>
+            <span class="badge ${p[6] ? "active" : "inactive"}">${p[6] ? "ACTIVE" : "INACTIVE"}</span>
+          </div>
+          <div class="prop-stats">
+            <div class="stat"><div class="k">Available</div><div class="v">${p[4]} / ${p[3]}</div></div>
+            <div class="stat"><div class="k">Price / token</div><div class="v">${priceEth} ETH</div></div>
+            <div class="stat"><div class="k">You own</div><div class="v mine">${myBalance}</div></div>
+          </div>
+        </div>`;
+    }
+    list.innerHTML = html;
+  } catch (err) {
+    list.innerHTML = '<p class="empty">Could not load properties. Check you are on the right network.</p>';
+    console.error(err);
+  }
+}
+
+async function updateContractBalance() {
+  try {
+    const bal = await contract.getContractBalance();
+    $("contractBal").textContent = ethers.utils.formatEther(bal) + " ETH";
+  } catch (err) { /* not owner or call failed */ }
+}
+
+// ---- WRITE actions -------------------------------------------------------
+async function addProperty() {
+  const name = $("pName").value.trim();
+  const loc = $("pLoc").value.trim();
+  const total = $("pTotal").value;
+  const priceEth = $("pPrice").value;
+  if (!name || !loc || !total || !priceEth) {
+    return toast("err", "Missing details", "Fill in every field before adding a property.", true);
+  }
+  try {
+    const priceWei = ethers.utils.parseEther(priceEth);   // ETH -> wei
+    toast("pending", "Confirm in MetaMask…", "Adding property.");
+    const tx = await contract.addProperty(name, loc, total, priceWei);
+    toast("pending", "Transaction pending…", txLink(tx.hash));
+    await tx.wait();                                       // wait for confirmation
+    toast("ok", "Property added", txLink(tx.hash), true);
+    clearInputs(["pName", "pLoc", "pTotal", "pPrice"]);
+    await refresh();
+  } catch (err) {
+    toast("err", "Add property failed", prettyError(err), true);
+  }
+}
+
+async function buyTokens() {
+  const id = $("bId").value;
+  const amount = $("bAmount").value;
+  if (!id || !amount) return toast("err", "Missing details", "Enter a property ID and amount.", true);
+  try {
+    // Cost = amount × tokenPrice. Read the price from the contract so we send exactly right.
+    const p = await contract.getProperty(id);
+    const cost = ethers.BigNumber.from(p[5]).mul(amount);
+    toast("pending", "Confirm in MetaMask…", "Buying " + amount + " token(s).");
+    const tx = await contract.buyTokens(id, amount, { value: cost });
+    toast("pending", "Transaction pending…", txLink(tx.hash));
+    await tx.wait();
+    toast("ok", "Tokens purchased", txLink(tx.hash), true);
+    clearInputs(["bId", "bAmount"]);
+    await refresh();
+    if (ownerAddress && ownerAddress.toLowerCase() === userAddress.toLowerCase()) updateContractBalance();
+  } catch (err) {
+    toast("err", "Purchase failed", prettyError(err), true);
+  }
+}
+
+async function transferTokens() {
+  const id = $("tId").value;
+  const to = $("tTo").value.trim();
+  const amount = $("tAmount").value;
+  if (!id || !to || !amount) return toast("err", "Missing details", "Fill in all transfer fields.", true);
+  if (!ethers.utils.isAddress(to)) return toast("err", "Bad address", "That recipient address isn't valid.", true);
+  try {
+    toast("pending", "Confirm in MetaMask…", "Transferring " + amount + " token(s).");
+    const tx = await contract.transferTokens(id, to, amount);
+    toast("pending", "Transaction pending…", txLink(tx.hash));
+    await tx.wait();
+    toast("ok", "Tokens transferred", txLink(tx.hash), true);
+    clearInputs(["tId", "tTo", "tAmount"]);
+    await refresh();
+  } catch (err) {
+    toast("err", "Transfer failed", prettyError(err), true);
+  }
+}
+
+async function withdrawFunds() {
+  try {
+    toast("pending", "Confirm in MetaMask…", "Withdrawing funds.");
+    const tx = await contract.withdrawFunds();
+    toast("pending", "Transaction pending…", txLink(tx.hash));
+    await tx.wait();
+    toast("ok", "Funds withdrawn", txLink(tx.hash), true);
+    updateContractBalance();
+  } catch (err) {
+    toast("err", "Withdrawal failed", prettyError(err), true);
+  }
+}
+
+// ---- Helpers -------------------------------------------------------------
+function short(a) { return a.slice(0, 6) + "…" + a.slice(-4); }
+function clearInputs(ids) { ids.forEach((id) => ($(id).value = "")); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+// On Sepolia we can link to Etherscan; on Ganache there's no explorer.
+function txLink(hash) {
+  if (EXPECTED_CHAIN_ID === 11155111) {
+    return `Tx: <a href="https://sepolia.etherscan.io/tx/${hash}" target="_blank">${short(hash)}</a>`;
+  }
+  return "Tx hash: " + short(hash);
+}
+
+// ---- Wire up buttons -----------------------------------------------------
+connectBtn.addEventListener("click", connect);
+$("refreshBtn").addEventListener("click", refresh);
+$("addBtn").addEventListener("click", addProperty);
+$("buyBtn").addEventListener("click", buyTokens);
+$("transferBtn").addEventListener("click", transferTokens);
+$("withdrawBtn").addEventListener("click", withdrawFunds);
+</script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Real Estate Tokenization dApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+    }
+
+    h1, h2 {
+      color: #222;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 6px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      background: #222;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    .section {
+      border-top: 1px solid #ddd;
+      margin-top: 20px;
+      padding-top: 20px;
+    }
+
+    #status {
+      margin-top: 15px;
+      padding: 10px;
+      background: #eee;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
+
+    .wallet {
+      font-weight: bold;
+      color: green;
+      word-break: break-all;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Real Estate Tokenization dApp</h1>
+
+    <button onclick="connectWallet()">Connect MetaMask</button>
+    <p>Connected Wallet:</p>
+    <p id="walletAddress" class="wallet">Not connected</p>
+
+    <div class="section">
+      <h2>Add Property Owner Only</h2>
+      <input id="propertyName" placeholder="Property Name e.g. Cyberjaya Condo">
+      <input id="propertyLocation" placeholder="Location e.g. Cyberjaya">
+      <input id="totalTokens" type="number" placeholder="Total Tokens e.g. 1000">
+      <input id="tokenPriceEth" type="text" placeholder="Token Price in ETH e.g. 0.01">
+      <button onclick="addProperty()">Add Property</button>
+    </div>
+
+    <div class="section">
+      <h2>Get Property</h2>
+      <input id="getPropertyId" type="number" placeholder="Property ID e.g. 1">
+      <button onclick="getProperty()">Get Property</button>
+      <pre id="propertyOutput"></pre>
+    </div>
+
+    <div class="section">
+      <h2>Buy Tokens</h2>
+      <input id="buyPropertyId" type="number" placeholder="Property ID e.g. 1">
+      <input id="buyAmount" type="number" placeholder="Amount of tokens e.g. 2">
+      <button onclick="buyTokens()">Buy Tokens</button>
+    </div>
+
+    <div class="section">
+      <h2>Check Token Balance</h2>
+      <input id="balancePropertyId" type="number" placeholder="Property ID e.g. 1">
+      <input id="balanceAddress" placeholder="Wallet Address">
+      <button onclick="getTokenBalance()">Check Balance</button>
+      <p id="balanceOutput"></p>
+    </div>
+
+    <div class="section">
+      <h2>Transfer Tokens</h2>
+      <input id="transferPropertyId" type="number" placeholder="Property ID e.g. 1">
+      <input id="receiverAddress" placeholder="Receiver Wallet Address">
+      <input id="transferAmount" type="number" placeholder="Amount e.g. 1">
+      <button onclick="transferTokens()">Transfer Tokens</button>
+    </div>
+
+    <div class="section">
+      <h2>Withdraw Funds Owner Only</h2>
+      <button onclick="withdrawFunds()">Withdraw Funds</button>
+    </div>
+
+    <div class="section">
+      <h2>Status</h2>
+      <div id="status">Ready.</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+
+  <script>
+    let provider;
+    let signer;
+    let contract;
+
+    // CHANGE THIS after deployment
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+    const abi = [
+      "function owner() view returns (address)",
+      "function propertyCount() view returns (uint256)",
+      "function addProperty(string calldata _name, string calldata _location, uint256 _totalTokens, uint256 _tokenPrice) external",
+      "function buyTokens(uint256 _propertyId, uint256 _amount) external payable",
+      "function transferTokens(uint256 _propertyId, address _to, uint256 _amount) external",
+      "function getTokenBalance(uint256 _propertyId, address _user) external view returns (uint256)",
+      "function getProperty(uint256 _propertyId) external view returns (uint256 id, string memory name, string memory location, uint256 totalTokens, uint256 availableTokens, uint256 tokenPrice, bool active)",
+      "function withdrawFunds() external",
+      "function getContractBalance() external view returns (uint256)"
+    ];
+
+    function setStatus(message) {
+      document.getElementById("status").innerText = message;
+    }
+
+    async function connectWallet() {
+      try {
+        if (!window.ethereum) {
+          setStatus("MetaMask not found. Please install MetaMask.");
+          return;
+        }
+
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
+
+        const wallet = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = wallet;
+
+        contract = new ethers.Contract(contractAddress, abi, signer);
+
+        setStatus("Wallet connected successfully.");
+      } catch (error) {
+        setStatus("Connection failed: " + error.message);
+      }
+    }
+
+    async function addProperty() {
+      try {
+        const name = document.getElementById("propertyName").value;
+        const location = document.getElementById("propertyLocation").value;
+        const totalTokens = document.getElementById("totalTokens").value;
+        const tokenPriceEth = document.getElementById("tokenPriceEth").value;
+
+        const tokenPriceWei = ethers.parseEther(tokenPriceEth);
+
+        setStatus("Transaction pending: adding property...");
+
+        const tx = await contract.addProperty(name, location, totalTokens, tokenPriceWei);
+        await tx.wait();
+
+        setStatus("Property added successfully. Transaction hash:\n" + tx.hash);
+      } catch (error) {
+        setStatus("Add property failed: " + getReadableError(error));
+      }
+    }
+
+    async function getProperty() {
+      try {
+        const propertyId = document.getElementById("getPropertyId").value;
+
+        setStatus("Reading property data...");
+
+        const property = await contract.getProperty(propertyId);
+
+        const output =
+          "Property ID: " + property.id + "\n" +
+          "Name: " + property.name + "\n" +
+          "Location: " + property.location + "\n" +
+          "Total Tokens: " + property.totalTokens + "\n" +
+          "Available Tokens: " + property.availableTokens + "\n" +
+          "Token Price ETH: " + ethers.formatEther(property.tokenPrice) + "\n" +
+          "Active: " + property.active;
+
+        document.getElementById("propertyOutput").innerText = output;
+
+        setStatus("Property data loaded successfully.");
+      } catch (error) {
+        setStatus("Get property failed: " + getReadableError(error));
+      }
+    }
+
+    async function buyTokens() {
+      try {
+        const propertyId = document.getElementById("buyPropertyId").value;
+        const amount = document.getElementById("buyAmount").value;
+
+        const property = await contract.getProperty(propertyId);
+        const totalCost = property.tokenPrice * BigInt(amount);
+
+        setStatus("Transaction pending: buying tokens...");
+
+        const tx = await contract.buyTokens(propertyId, amount, {
+          value: totalCost
+        });
+
+        await tx.wait();
+
+        setStatus("Tokens bought successfully. Transaction hash:\n" + tx.hash);
+      } catch (error) {
+        setStatus("Buy tokens failed: " + getReadableError(error));
+      }
+    }
+
+    async function getTokenBalance() {
+      try {
+        const propertyId = document.getElementById("balancePropertyId").value;
+        const userAddress = document.getElementById("balanceAddress").value;
+
+        setStatus("Reading token balance...");
+
+        const balance = await contract.getTokenBalance(propertyId, userAddress);
+        document.getElementById("balanceOutput").innerText = "Token Balance: " + balance;
+
+        setStatus("Token balance loaded successfully.");
+      } catch (error) {
+        setStatus("Get token balance failed: " + getReadableError(error));
+      }
+    }
+
+    async function transferTokens() {
+      try {
+        const propertyId = document.getElementById("transferPropertyId").value;
+        const receiver = document.getElementById("receiverAddress").value;
+        const amount = document.getElementById("transferAmount").value;
+
+        setStatus("Transaction pending: transferring tokens...");
+
+        const tx = await contract.transferTokens(propertyId, receiver, amount);
+        await tx.wait();
+
+        setStatus("Tokens transferred successfully. Transaction hash:\n" + tx.hash);
+      } catch (error) {
+        setStatus("Transfer tokens failed: " + getReadableError(error));
+      }
+    }
+
+    async function withdrawFunds() {
+      try {
+        setStatus("Transaction pending: withdrawing funds...");
+
+        const tx = await contract.withdrawFunds();
+        await tx.wait();
+
+        setStatus("Funds withdrawn successfully. Transaction hash:\n" + tx.hash);
+      } catch (error) {
+        setStatus("Withdraw failed: " + getReadableError(error));
+      }
+    }
+
+    function getReadableError(error) {
+      if (error.reason) return error.reason;
+      if (error.shortMessage) return error.shortMessage;
+      if (error.message) return error.message;
+      return "Unknown error";
+    }
+  </script>
+</body>
+</html>
