@@ -39,7 +39,7 @@ export class AuthClient {
     const api = new URL(this.settings.baseUrl); const app = new URL(this.origin);
     if (api.hostname !== app.hostname || api.protocol !== app.protocol) throw new ApiError('cookie_site', 'Sign-in needs matching frontend/API hostnames and schemes. Use 127.0.0.1 for both, or localhost for both, and check AUTH_ORIGIN.');
   }
-  private async request<T>(path: string, method: string, body: unknown, validate: (value: unknown) => boolean, signal?: AbortSignal, csrf?: string): Promise<T> {
+  private async request<T>(path: string, method: string, body: unknown, validate: (value: unknown) => boolean, signal?: AbortSignal, csrf?: string, binary = false): Promise<T> {
     this.checkSite();
     const controller = new AbortController(); let timedOut = false;
     const cancel = () => controller.abort(); signal?.addEventListener('abort', cancel, { once: true }); if (signal?.aborted) cancel();
@@ -54,8 +54,15 @@ export class AuthClient {
         const response = await this.fetcher(this.settings.baseUrl + path, { method, headers, credentials: 'include', cache: 'no-store', redirect: 'error', signal: controller.signal, ...(method === 'GET' ? {} : { body: JSON.stringify(body ?? {}) }) });
         if (!response.ok) {
           if (response.status === 401) this.csrf = null;
+          if (path.includes('/studio/') && response.status >= 400 && response.status < 500 && response.status !== 401) {
+            let detail: unknown;
+            try { detail = (await response.json())?.error?.message; } catch { /* Fall through to redacted status text. */ }
+            if (Array.isArray(detail) && detail.every(item => typeof item === 'string')) detail = detail.slice(0,4).join('; ');
+            if (typeof detail === 'string' && detail.length > 0 && detail.length <= 500) throw new ApiError('studio_http', detail, response.status);
+          }
           throw new ApiError(response.status === 401 ? 'unauthorized' : 'auth_http', response.status === 401 ? 'Sign-in expired or the signature/challenge was invalid. Sign in again.' : response.status === 403 ? 'Access denied. Check your organization role, AUTH_ORIGIN and session/CSRF settings.' : response.status === 404 ? 'Organization or invitation is unavailable to this account.' : response.status === 409 ? 'This change conflicts with membership, invitation or last-owner rules.' : response.status === 429 ? 'Too many sign-in requests. Wait a minute before retrying.' : 'The sign-in or organization request failed.', response.status);
         }
+        if (binary) return await response.blob() as T;
         const value: unknown = await response.json();
         if (!validate(value)) throw new ApiError('auth_response', 'The authentication API returned an incompatible response.');
         return value as T;
@@ -97,4 +104,23 @@ export class AuthClient {
   revoke(orgId: string, invitationId: string, signal?: AbortSignal) { return this.request(`/api/v1/organizations/${this.id(orgId)}/invitations/${this.id(invitationId)}`, 'DELETE', {}, value => object(value) && value.revoked === true, signal); }
   audit(id: string, signal?: AbortSignal) { return this.request<{ data: Array<{ id: string; action: string; createdAt: string }> }>(`/api/v1/organizations/${this.id(id)}/audit`, 'GET', null, value => object(value) && Array.isArray(value.data) && value.data.every((a: any) => object(a) && uuid(a.id) && typeof a.action === 'string' && date(a.createdAt)), signal); }
   directory(signal?: AbortSignal) { return this.request<{ data: Array<{ id: string; name: string; createdAt: string }> }>('/api/v1/platform/organizations', 'GET', null, value => object(value) && Array.isArray(value.data) && value.data.every((o: any) => object(o) && uuid(o.id) && typeof o.name === 'string' && date(o.createdAt)), signal); }
+  private studioPath(orgId: string, recordId?: string) { return `/api/v1/organizations/${this.id(orgId)}/studio/records${recordId ? '/' + this.id(recordId) : ''}`; }
+  studioCandidates(orgId:string,signal?:AbortSignal) {return this.request<{data:Array<{propertyId:string;onChainId:string;chainId:string;contractAddress:string;name:string}>}>(`/api/v1/organizations/${this.id(orgId)}/studio/candidates`,'GET',null,value=>object(value)&&Array.isArray(value.data)&&value.data.every((p:any)=>uuid(p.propertyId)&&typeof p.onChainId==='string'&&typeof p.chainId==='string'&&address(p.contractAddress)&&typeof p.name==='string'),signal);}
+  studioRecords(orgId: string, signal?: AbortSignal) { return this.request<StudioList>(this.studioPath(orgId), 'GET', null, value => object(value) && Array.isArray(value.data) && value.data.every((r: any) => uuid(r.id) && typeof r.title === 'string' && ['draft','published','archived'].includes(r.state)) && studioPermissions(value.permissions), signal); }
+  studioRecord(orgId: string, id: string, signal?: AbortSignal) { return this.request<StudioDetail>(this.studioPath(orgId,id), 'GET', null, value => object(value) && object(value.data) && value.data.id === id && value.data.organizationId === orgId && Array.isArray(value.data.versions) && value.data.versions.every((v: any) => uuid(v.id) && Number.isInteger(v.version) && Number.isInteger(v.revision) && ['draft','published','archived'].includes(v.state) && typeof v.title === 'string' && typeof v.description === 'string' && object(v.characteristics) && Array.isArray(v.assets)) && Array.isArray(value.data.assets) && Array.isArray(value.data.history) && studioPermissions(value.permissions), signal); }
+  studioCreate(orgId: string, body: StudioDraft, signal?: AbortSignal) { return this.request<{id:string}>(this.studioPath(orgId), 'POST', body, value => object(value) && uuid(value.id), signal); }
+  studioSave(orgId: string, id: string, body: StudioDraft & {expectedRevision:number;assets:StudioAttachment[]}, signal?: AbortSignal) { return this.request(this.studioPath(orgId,id)+'/draft', 'PATCH', body, value => object(value) && value.updated === true && Number.isInteger(value.revision), signal); }
+  studioRevise(orgId: string,id: string,signal?:AbortSignal) { return this.request(this.studioPath(orgId,id)+'/revisions','POST',{},value=>object(value)&&uuid(value.id),signal); }
+  studioAssociate(orgId:string,id:string,propertyId:string,signal?:AbortSignal) { return this.request(this.studioPath(orgId,id)+'/association','POST',{propertyId:this.id(propertyId)},value=>object(value)&&value.associated===true,signal); }
+  studioPublish(orgId:string,id:string,revision:number,signal?:AbortSignal) { return this.request(this.studioPath(orgId,id)+'/publish','POST',{expectedRevision:revision,confirmPublication:true},value=>object(value)&&value.published===true,signal); }
+  studioArchive(orgId:string,id:string,signal?:AbortSignal) { return this.request(this.studioPath(orgId,id)+'/archive','POST',{confirmArchive:true},value=>object(value)&&value.archived===true,signal); }
+  studioUpload(orgId:string,id:string,body:{name:string;mimeType:string;base64:string},signal?:AbortSignal) { return this.request<{id:string}>(this.studioPath(orgId,id)+'/assets','POST',body,value=>object(value)&&uuid(value.id),signal); }
+  studioAsset(orgId:string,id:string,assetId:string,signal?:AbortSignal) { return this.request<Blob>(this.studioPath(orgId,id)+'/assets/'+this.id(assetId),'GET',null,()=>true,signal,undefined,true); }
 }
+export interface StudioPermissions { role: OrganizationRole; canEdit:boolean; canPublish:boolean; }
+const studioPermissions=(v:unknown):boolean=>object(v)&&role(v.role)&&typeof v.canEdit==='boolean'&&typeof v.canPublish==='boolean';
+export interface StudioDraft { title:string; location:string; description:string; characteristics:Record<string,string|number>; }
+export interface StudioAttachment { assetId:string; purpose:'hero'|'gallery'|'supporting_document';altText:string;caption:string; }
+export interface StudioVersion extends StudioDraft { id:string;version:number;revision:number;state:'draft'|'published'|'archived';publishedAt:string|null;updatedAt:string;assets:StudioAttachment[]; }
+export interface StudioList { data:Array<{id:string;title:string;state:string;version:number;archived:boolean;propertyId:string|null;updatedAt:string}>;permissions:StudioPermissions;limit:number; }
+export interface StudioDetail { data:{id:string;organizationId:string;propertyId:string|null;archived:boolean;association:null|{propertyId:string;onChainId:string;chainId:string;contractAddress:string;canonical:boolean;note:string};versions:StudioVersion[];assets:Array<{id:string;name:string;kind:'image'|'document';mimeType:string;byteSize:number;sha256:string}>;history:Array<{action:string;versionId:string|null;actorUserId:string;createdAt:string}>};permissions:StudioPermissions; }

@@ -8,6 +8,7 @@ node_modules/
 *.key
 secrets/
 keystore/
+.brickshare-storage/
 *.log
 
 # Frontend build output and machine-specific deployment metadata

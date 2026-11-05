@@ -45,8 +45,8 @@ async function fixture(run: (f: any) => Promise<void>) {
   }
 }
 test('auth migration upgrades/rolls back/reapplies independently without changing public catalog data', async () => fixture(async ({ source }: any) => {
-  await source.undoLastMigration(); await source.query(`INSERT INTO properties(source,fixture_label) VALUES('fictional','preserved')`);
-  assert.equal((await source.runMigrations()).length, 1);
+  await source.undoLastMigration(); await source.undoLastMigration(); await source.query(`INSERT INTO properties(source,fixture_label) VALUES('fictional','preserved')`);
+  assert.equal((await source.runMigrations()).length, 2);
   assert.equal((await source.query('SELECT fixture_label FROM properties'))[0].fixture_label, 'preserved');
   assert.equal((await source.query(`SELECT count(*) FROM pg_indexes WHERE schemaname=current_schema() AND indexname='memberships_user_idx'`))[0].count, '1');
 }));

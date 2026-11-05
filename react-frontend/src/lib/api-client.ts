@@ -47,7 +47,7 @@ function synchronization(value: unknown): value is Synchronization {
 function metadata(value: unknown): boolean {
   if (value === null) return true;
   if (!object(value) || value.source !== 'operator_metadata' || value.publicationState !== 'published' || !Number.isInteger(value.version) || value.version < 1 || !date(value.updatedAt) || !['title', 'location', 'description'].every(key => nullableText(value[key])) || !Array.isArray(value.assets) || value.assets.length > 500) return false;
-  return value.assets.every((asset: unknown) => object(asset) && uuid(asset.id) && ['image', 'document'].includes(asset.kind) && text(asset.mimeType) && decimal(asset.byteSize) && hash(asset.sha256) && text(asset.purpose) && nullableText(asset.altText) && nullableText(asset.caption) && nullableText(asset.url) && ['not_served_by_api', 'configured_external_reference'].includes(asset.availability));
+  return value.assets.every((asset: unknown) => object(asset) && uuid(asset.id) && ['image', 'document'].includes(asset.kind) && text(asset.mimeType) && decimal(asset.byteSize) && hash(asset.sha256) && text(asset.purpose) && nullableText(asset.altText) && nullableText(asset.caption) && nullableText(asset.url) && ['not_served_by_api', 'configured_external_reference', 'local_published'].includes(asset.availability));
 }
 function property(value: unknown): boolean {
   if (!object(value) || !uuid(value.id) || !['blockchain', 'fictional'].includes(value.source) || typeof value.isFictional !== 'boolean' || !nullableText(value.fixtureLabel) || !metadata(value.metadata)) return false;
@@ -79,6 +79,15 @@ export class ApiClient {
         if (!response.headers.get('content-type')?.includes('application/json')) return invalid();
         let value: unknown; try { value = await response.json(); } catch { return invalid(); }
         if (!validate(value)) return invalid();
+        // Local Studio assets are supplied as exact relative media routes only.
+        // Resolve against the configured API, never the frontend or an arbitrary URL.
+        const data = (value as any)?.data;
+        for (const row of Array.isArray(data) ? data : data ? [data] : []) for (const asset of row.metadata?.assets ?? []) {
+          if (asset.availability === 'local_published') {
+            if (asset.url !== `/api/v1/media/${asset.id}`) return invalid();
+            asset.url = new URL(asset.url, this.settings.baseUrl!).href;
+          }
+        }
         return value as T;
       })()]);
     } catch (error) {

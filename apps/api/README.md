@@ -4,6 +4,10 @@ Optional NestJS modular monolith for BrickShare Invest and Studio. It does not s
 transactions or hold funds. The optional Phase 2B.1 worker reconciles local chain
 snapshots; see [indexer startup and recovery](../../docs/INDEXER.md).
 
+Phase 2C provides SIWE sessions and organizations; Phase 2D adds tenant-owned
+Studio metadata, explicit owner publication and controlled private/local media.
+See [Studio setup, endpoints and security boundaries](../../docs/PHASE_2D.md).
+
 See [setup and HTTP API reference](../../docs/API.md),
 [architecture](../../docs/ARCHITECTURE.md) and
 [Phase 2A delivery notes](../../docs/PHASE_2A.md).

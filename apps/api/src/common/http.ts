@@ -33,7 +33,14 @@ export function configureHttp(app: INestApplication, env: Environment, logger: J
     response.on('finish', () => logger.event('info', 'http_request', { method: request.method, route: request.route?.path || 'unmatched', status: response.statusCode, requestId: request.requestId, durationMs: Date.now() - start }));
     next();
   });
-  app.use(json({ limit: '16kb', strict: true }));
+  const uploadJson = json({ limit: '1500kb', strict: true });
+  const normalJson = json({ limit: '16kb', strict: true });
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    // Only this bounded JSON/base64 upload route accepts a larger body. It uses
+    // the same session, Origin, JSON and CSRF guard as all other mutations.
+    const upload = request.method === 'POST' && /^\/api\/v1\/organizations\/[a-f0-9-]{36}\/studio\/records\/[a-f0-9-]{36}\/assets\/?$/i.test(request.path);
+    return (upload ? uploadJson : normalJson)(request, response, next);
+  });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true, forbidUnknownValues: true, validationError: { target: false, value: false } }));
   app.useGlobalFilters(new ApiExceptionFilter(logger));
   app.enableShutdownHooks();

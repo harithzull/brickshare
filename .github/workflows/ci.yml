@@ -45,11 +45,11 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix react-frontend
       - run: npm run compile
-      - name: API and SIWE security unit tests
+      - name: API, SIWE and Studio storage security unit tests
         run: npm run test:api
-      - name: PostgreSQL migrations, authentication and tenant isolation tests
+      - name: PostgreSQL migrations, Studio publication and tenant isolation tests
         run: npm run test:api:db
-      - name: Real local-chain integration and HTTP wallet login
+      - name: Real local-chain, wallet login and Studio publication integration
         run: npm run test:indexer:live
       - run: npm run build:api
 
@@ -87,7 +87,7 @@ jobs:
           cache: npm
           cache-dependency-path: react-frontend/package-lock.json
       - run: npm ci --prefix react-frontend
-      - name: Frontend metadata, wallet session and transaction compatibility tests
+      - name: Frontend Studio, wallet session and transaction compatibility tests
         run: npm run test:frontend
       - run: npm run build
       - name: Validate hosted-testnet build path with public test configuration
@@ -98,3 +98,4 @@ jobs:
           VITE_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111"
           VITE_DEPLOYMENT_BLOCK: "1"
           VITE_RPC_URL: https://sepolia.base.org
+          VITE_API_BASE_URL: ""

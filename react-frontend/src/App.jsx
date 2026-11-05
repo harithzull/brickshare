@@ -21,6 +21,7 @@ const PropertyDetailsPage = lazy(() => import("./pages/PropertyDetailsPage"));
 const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const OrganizationsPage = lazy(() => import("./pages/OrganizationsPage"));
+const StudioPage = lazy(() => import("./pages/StudioPage"));
 let sessionClient = null;
 try { sessionClient = new AuthClient(apiSettings(import.meta.env, CHAIN.networkName), typeof window === 'undefined' ? 'http://127.0.0.1:5173' : window.location.origin); } catch { /* Public browsing and transactions stay independent. */ }
 
@@ -60,6 +61,7 @@ export default function App() {
       portfolio: "Your portfolio",
       admin: "Administration",
       organizations: "Organizations",
+      studio: "Property management studio",
       property: property?.name || "Property details",
     };
     document.title = `${titles[route.page]} · BrickShare`;
@@ -207,6 +209,7 @@ export default function App() {
           )}
           {route.page === "admin" && <AdminPage app={app} />}
           {route.page === "organizations" && <OrganizationsPage key={auth.session?.user.id || 'anonymous'} auth={auth} />}
+          {route.page === "studio" && <StudioPage key={auth.session?.user.id || 'anonymous'} auth={auth} navigate={navigate} />}
         </Suspense>
       </main>
       <Footer />
