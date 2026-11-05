@@ -26,5 +26,5 @@ export default defineConfig(({ command, mode }) => {
       },
     });
   }
-  return { plugins: [react()] };
+  return { plugins: [react()], resolve: { alias: { buffer: 'buffer/' } } };
 });

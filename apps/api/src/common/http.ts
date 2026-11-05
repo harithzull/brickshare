@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, INestApplication, ValidationPipe } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, json } from 'express';
 import { JsonLogger } from './json-logger';
 import { Environment } from '../config/environment';
 
@@ -13,7 +13,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const request = context.getRequest<RequestWithId>();
     const response = context.getResponse<Response>();
-    const status = error instanceof HttpException ? error.getStatus() : 500;
+    const parserStatus = typeof error === 'object' && error && 'type' in error && (error.type === 'entity.too.large' || error.type === 'entity.parse.failed') ? error.type === 'entity.too.large' ? 413 : 400 : null;
+    const status = error instanceof HttpException ? error.getStatus() : parserStatus ?? 500;
     const body = error instanceof HttpException ? error.getResponse() : null;
     const message = status >= 500 ? status === 503 ? 'Service unavailable' : 'Internal server error' : typeof body === 'object' && body && 'message' in body ? body.message : 'Request rejected';
     this.logger.event(status >= 500 ? 'error' : 'warn', 'request_rejected', { status, requestId: request.requestId });
@@ -22,7 +23,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 }
 
 export function configureHttp(app: INestApplication, env: Environment, logger: JsonLogger) {
-  app.enableCors({ origin: env.CORS_ORIGINS.split(',').map(value => value.trim()).filter(Boolean), credentials: false });
+  app.enableCors({ origin: env.CORS_ORIGINS.split(',').map(value => value.trim()).filter(Boolean), credentials: true, allowedHeaders: ['Content-Type', 'X-BrickShare-Auth', 'X-CSRF-Token'], methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] });
   app.use((request: RequestWithId, response: Response, next: NextFunction) => {
     request.requestId = randomUUID();
     response.setHeader('X-Request-Id', request.requestId);
@@ -32,6 +33,7 @@ export function configureHttp(app: INestApplication, env: Environment, logger: J
     response.on('finish', () => logger.event('info', 'http_request', { method: request.method, route: request.route?.path || 'unmatched', status: response.statusCode, requestId: request.requestId, durationMs: Date.now() - start }));
     next();
   });
+  app.use(json({ limit: '16kb', strict: true }));
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true, forbidUnknownValues: true, validationError: { target: false, value: false } }));
   app.useGlobalFilters(new ApiExceptionFilter(logger));
   app.enableShutdownHooks();

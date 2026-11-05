@@ -1,9 +1,12 @@
 # BrickShare API: setup and reference
 
 The optional service in `apps/api` is a NestJS/TypeScript modular monolith backed
-by PostgreSQL 16 and TypeORM. It is a read-only metadata foundation with an optional
-Phase 2B.1 local indexing worker and Phase 2B.2 optional frontend metadata client.
-Authentication, uploads and financial writes are not included. The frontend does
+by PostgreSQL 16 and TypeORM. Public catalog reads retain the optional
+Phase 2B.1 local indexing worker and Phase 2B.2 frontend metadata client.
+Phase 2C adds SIWE authentication and organization/membership management; see the
+[authentication API and CMD setup](PHASE_2C.md) for the implemented endpoints,
+cookie/CSRF protocol, permissions and limitations. Uploads, property CMS writes
+and financial writes are not included. The frontend does
 not require this API to browse through RPC or transact.
 The React application continues to use its existing RPC and wallet flows.
 
@@ -54,6 +57,14 @@ For a native PostgreSQL instance, create an application database/user yourself a
 set `DATABASE_URL` accordingly; skip Compose. The local migration role needs DDL
 permission in `DATABASE_SCHEMA` (default `public`). A custom schema must already
 exist. No PostgreSQL extensions are required. `gen_random_uuid()` is built in.
+
+For wallet sign-in, configure `AUTH_ORIGIN=http://127.0.0.1:5173` and include that
+exact origin in `CORS_ORIGINS`. The frontend API URL and browser page must use
+matching hostnames and schemes; mixing `localhost` and `127.0.0.1` prevents
+SameSite cookies. Authentication mutations require JSON, an exact Origin,
+`X-BrickShare-Auth: 1`, and (after nonce issuance) the appropriate CSRF token.
+The private AuthClient supplies these headers; public catalog requests continue
+to omit cookie credentials. Never put credentials in `VITE_` variables.
 
 `docker compose --env-file apps/api/.env stop postgres` preserves the database
 volume. Changing Compose's password variables does not change credentials inside

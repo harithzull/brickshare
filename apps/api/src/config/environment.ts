@@ -18,6 +18,12 @@ export class Environment {
   @IsOptional() @IsString() ASSET_PUBLIC_BASE_URL?: string;
   @Transform(boolean) @IsBoolean() ALLOW_FICTIONAL_SEED = false;
   @Transform(integer) @IsInt() @Min(1000) @Max(3600000) INDEXER_STALE_AFTER_MS = 30000;
+  @IsString() AUTH_ORIGIN = 'http://127.0.0.1:5173';
+  @IsString() AUTH_CHAIN_IDS = '31337';
+  @Transform(integer) @IsInt() @Min(60) @Max(600) AUTH_CHALLENGE_TTL_SECONDS = 300;
+  @Transform(integer) @IsInt() @Min(60) @Max(86400) AUTH_SESSION_TTL_SECONDS = 3600;
+  @Transform(boolean) @IsBoolean() AUTH_COOKIE_SECURE = false;
+  @Transform(boolean) @IsBoolean() ALLOW_LOCAL_ADMIN_BOOTSTRAP = false;
 }
 
 export function validateEnvironment(input: Record<string, unknown>): Environment {
@@ -34,7 +40,13 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
     for (const origin of origins) { const parsed = new URL(origin); if (!['http:', 'https:'].includes(parsed.protocol) || parsed.origin !== origin || parsed.username || parsed.password) throw new Error(); }
     if (env.ASSET_PUBLIC_BASE_URL) { const asset = new URL(env.ASSET_PUBLIC_BASE_URL); if (asset.protocol !== 'https:' || asset.username || asset.password || asset.search || asset.hash) throw new Error(); }
     if (env.NODE_ENV === 'production' && (!env.DATABASE_SSL || origins.some(origin => !origin.startsWith('https://')))) throw new Error();
-  } catch { throw new Error('Invalid API database URL, TLS, CORS or public asset configuration. Values are redacted.'); }
+    const auth = new URL(env.AUTH_ORIGIN);
+    if (auth.origin !== env.AUTH_ORIGIN || auth.username || auth.password || !origins.includes(env.AUTH_ORIGIN)) throw new Error();
+    if (auth.protocol !== 'https:' && !(auth.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(auth.hostname) && env.NODE_ENV !== 'production')) throw new Error();
+    if (!['localhost', '127.0.0.1', '[::1]'].includes(auth.hostname) && !env.AUTH_COOKIE_SECURE) throw new Error();
+    if (!env.AUTH_CHAIN_IDS.split(',').every(id => ['31337', '84532'].includes(id.trim()))) throw new Error();
+    if (env.NODE_ENV === 'production' && (!env.AUTH_COOKIE_SECURE || env.ALLOW_LOCAL_ADMIN_BOOTSTRAP)) throw new Error();
+  } catch { throw new Error('Invalid API database URL, TLS, CORS, authentication or public asset configuration. Values are redacted.'); }
   return env;
 }
 

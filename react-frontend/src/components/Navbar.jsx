@@ -37,7 +37,7 @@ export function WalletButton({ app }) {
         <Icon name="wallet" size={16} />
       </span>
       <span>
-        <small>{app.isOwner ? "Administrator" : "Connected wallet"}</small>
+        <small>{app.isOwner ? "Contract owner" : "Connected wallet"}</small>
         <strong title={app.wallet.account}>
           {shortAddress(app.wallet.account)}
         </strong>
@@ -58,7 +58,7 @@ export function WalletButton({ app }) {
   );
 }
 
-export default function Navbar({ route, app }) {
+export default function Navbar({ route, app, auth }) {
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     setExpanded(false);
@@ -69,6 +69,7 @@ export default function Navbar({ route, app }) {
     ["marketplace", "Properties"],
     ["portfolio", "My portfolio"],
     ["admin", "Administration"],
+    ...(auth?.session ? [["organizations", "Organizations"]] : []),
   ];
   return (
     <>
