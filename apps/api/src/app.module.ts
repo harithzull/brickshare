@@ -5,13 +5,14 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { NetworksModule } from './networks/networks.module';
 import { PropertiesModule } from './properties/properties.module';
+import { SynchronizationModule } from './indexer/synchronization.module';
 
 @Module({})
 export class AppModule {
   static register(input?: Record<string, unknown>): DynamicModule {
     return { module: AppModule, imports: [
       ConfigModule.forRoot({ isGlobal: true, cache: true, envFilePath: apiEnvPath, ignoreEnvFile: !!input, validate: raw => ({ validated: validateEnvironment(input ?? raw) }) }),
-      DatabaseModule, HealthModule, NetworksModule, PropertiesModule,
+      DatabaseModule, SynchronizationModule, HealthModule, NetworksModule, PropertiesModule,
     ] };
   }
 }

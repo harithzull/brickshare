@@ -1,10 +1,11 @@
 # BrickShare 2.0 — Hybrid architecture
 
-**Status:** Phase 2A implements the optional NestJS/PostgreSQL read-only foundation:
-six catalog entities, explicit SQL migrations, metadata queries and health checks.
-Authentication, chain ingestion, portfolio/activity projections, write APIs and
-object storage remain proposed. See [Phase 2A decisions](PHASE_2A.md) for the
-implementation scope/discrepancies and [API setup](API.md) for current endpoints.
+**Status:** Phase 2A implements the optional NestJS/PostgreSQL foundation. Phase
+2B.1 adds a separate local-only read-only worker, verified deployment incarnations,
+block/event history, atomic cursors, reconciled property snapshots and API freshness.
+Authentication, public-chain indexing, durable portfolio/activity projections,
+write APIs and object storage remain proposed. See [indexer design/setup](INDEXER.md),
+[Phase 2A decisions](PHASE_2A.md) and [API reference](API.md).
 
 ## 1. Architectural decision
 
@@ -71,7 +72,8 @@ ORM floating-point conversions. See [Nest database integration](https://docs.nes
 ## 4. Entity model
 
 The six network/property/asset tables below are implemented in Phase 2A; identity,
-authentication and projection tables remain **proposed**. Internal IDs are UUIDs;
+authentication and holdings/session tables remain **proposed**. Phase 2B.1 also
+implements deployment instances, blocks, events and cursors (see below). Internal IDs are UUIDs;
 a property's on-chain ID is a separate uint256. Never identify a property by token ID alone.
 
 ### Identity, authentication and administration
@@ -95,7 +97,7 @@ Apply equivalent 32-byte constraints to hashes.
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Chain                   | UUID PK; unique positive `chain_id bigint`; public name/explorer; enabled flag. Privileged RPC credentials stay in process configuration, not public rows. |
 | ContractDeployment      | UUID PK; chain FK; 20-byte address; deployment block/hash; 32-byte transaction hash; ABI/artifact version and hash; observed owner address; release reference; unique `(chain_id,address)`.              |
-| Property                | UUID PK; source; deployment FK; `on_chain_id numeric(78,0)`; chain-derived name/location/total/available/priceWei/active; observed block/hash; unique `(deployment_id,on_chain_id)`. Fictional fixtures have all chain fields null. |
+| Property                | UUID PK; source; deployment/instance identity; `on_chain_id numeric(78,0)`; chain-derived fields; observed block/hash. Unmanaged identity stays unique per deployment/token; managed historical creation hashes are isolated, with one canonical row per instance/token. Fictional fixtures have all chain fields null. |
 | PropertyMetadataVersion | UUID PK; property FK; sequential version; description/title/location; draft/published/archived state; nullable unverified author reference (future User FK); timestamps; unique `(property_id,version)`; at most one published version. |
 | Asset                   | UUID PK in `public_assets`; public object-storage key; MIME type, byte size, checksum, kind, publication state; nullable unverified creator reference (future User FK). Public files only. |
 | PropertyAsset           | UUID PK; metadata-version FK + asset FK unique pair; purpose, alt text, caption, display order. Published historical references are immutable. |
@@ -105,6 +107,16 @@ descriptions/documents honestly and retain labeled illustrations as fallback.
 Do not mutate name/location/price in the chain-derived row through metadata APIs.
 
 ### Events, projections and chain progress
+
+Phase 2B.1 implements `DeploymentInstance`, `ChainBlock`, `ChainEvent` and
+`IndexerCursor`. Block/event history is scoped to a verified deployment instance
+rather than only a public chain ID, isolating repeated local Hardhat runs. It
+retains raw noncanonical history and transactionally replaces property snapshots
+after replay/reconciliation. A chain-wide PostgreSQL advisory lock serializes local
+workers and reset invalidation across addresses. Holding maps are reconciled in
+memory only; durable holdings, submitted transactions and their APIs remain future.
+The table below is the broader target model; [INDEXER.md](INDEXER.md) records the
+implemented schema refinements, bounds, reset acknowledgement and remaining gaps.
 
 | Entity               | Key fields and constraints                                                                                                                                                                                                                            |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -167,7 +179,9 @@ indexer must label its own potentially lagging/finality-filtered view explicitly
 Phase 2A implements `/health/live`, `/health/ready`, `/api/v1/networks`,
 `/api/v1/properties` and `/api/v1/properties/:id` (internal UUID), with validation
 and real PostgreSQL tests. Queries separate off-chain metadata from unverified
-stored snapshots; no synchronization exists yet. The frontend does not consume
+stored snapshots; the optional local worker now supplies reconciled observations.
+`/api/v1/synchronization` exposes processing/freshness/provenance and is also
+embedded in property responses and DB readiness. The frontend does not consume
 these routes. See [API.md](API.md) for their exact current contract.
 
 The broader routes below remain the **future** proposal; the eventual version

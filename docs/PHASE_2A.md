@@ -1,5 +1,11 @@
 # BrickShare 2.0 — Phase 2A backend foundation
 
+This is the historical Phase 2A record. Phase 2B.1 now implements the optional
+local read-only indexer, deployment instances, event/block history, reconciled
+snapshots and synchronization status. See [INDEXER.md](INDEXER.md) for current
+setup, schema refinements, recovery and verification; other Phase 2B goals below
+remain future work.
+
 ## Delivered structure
 
 ```text

@@ -8,7 +8,7 @@ export class NetworksService {
   async list() {
     await this.database.requireReady();
     const rows = await this.database.source.getRepository(Chain).find({ where: { enabled: true }, order: { chainId: 'ASC' } });
-    return { data: rows.map(chain => ({ id: chain.id, chainId: chain.chainId, name: chain.name, explorerUrl: chain.explorerUrl })), meta: { source: 'database_configuration', synchronization: 'not_implemented' } };
+    return { data: rows.map(chain => ({ id: chain.id, chainId: chain.chainId, name: chain.name, explorerUrl: chain.explorerUrl })), meta: { source: 'database_configuration', synchronizationStatusUrl: '/api/v1/synchronization' } };
   }
 }
 @Controller('api/v1/networks')

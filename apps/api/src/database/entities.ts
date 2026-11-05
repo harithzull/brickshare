@@ -32,6 +32,9 @@ export class ContractDeployment extends Row {
 export type PropertySource = 'blockchain' | 'fictional';
 @Entity('properties')
 export class Property extends Row {
+  @Column({ name: 'deployment_instance_id', type: 'uuid', nullable: true }) deploymentInstanceId!: string | null;
+  @Column({ name: 'creation_block_hash', type: 'bytea', nullable: true }) creationBlockHash!: Buffer | null;
+  @Column({ name: 'canonical_snapshot', type: 'boolean', default: false }) canonicalSnapshot!: boolean;
   @Column({ type: 'varchar', length: 20 }) source!: PropertySource;
   @Column({ name: 'fixture_label', type: 'text', nullable: true }) fixtureLabel!: string | null;
   @Column({ name: 'deployment_id', type: 'uuid', nullable: true }) deploymentId!: string | null;

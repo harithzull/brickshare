@@ -3,12 +3,14 @@ import { DataSource } from 'typeorm';
 import { Environment } from '../config/environment';
 import { entities } from './entities';
 import { Foundation1731000000000 } from './migrations/1731000000000-foundation';
+import { Indexer1731100000000 } from './migrations/1731100000000-indexer';
+import { indexerEntities } from './indexer.entities';
 
 export function createDataSource(env: Environment): DataSource {
   return new DataSource({
     type: 'postgres', url: env.DATABASE_URL, schema: env.DATABASE_SCHEMA,
     ssl: env.DATABASE_SSL ? { rejectUnauthorized: true } : false,
-    entities, migrations: [Foundation1731000000000], migrationsTableName: 'api_migrations',
+    entities: [...entities, ...indexerEntities], migrations: [Foundation1731000000000, Indexer1731100000000], migrationsTableName: 'api_migrations',
     synchronize: false, migrationsRun: false, dropSchema: false, logging: false,
     // UUID defaults come from reviewed SQL using PostgreSQL's built-in function.
     // Even read-only startup must never attempt CREATE EXTENSION.

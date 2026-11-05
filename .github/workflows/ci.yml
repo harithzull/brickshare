@@ -42,8 +42,11 @@ jobs:
           cache: npm
           cache-dependency-path: apps/api/package-lock.json
       - run: npm run setup:api
+      - run: npm ci
+      - run: npm run compile
       - run: npm run test:api
       - run: npm run test:api:db
+      - run: npm run test:indexer:live
       - run: npm run build:api
 
   contracts:

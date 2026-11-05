@@ -7,6 +7,10 @@
     "node": ">=22.19.0 <23"
   },
   "scripts": {
+    "dev:indexer": "npm --prefix apps/api run worker:dev",
+    "start:indexer": "npm --prefix apps/api run worker:start",
+    "indexer:once": "npm --prefix apps/api run worker:once",
+    "test:indexer:live": "npm --prefix apps/api run test:indexer:live",
     "setup:api": "npm ci --prefix apps/api",
     "dev:api": "npm --prefix apps/api run dev",
     "build:api": "npm --prefix apps/api run build",

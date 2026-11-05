@@ -6,8 +6,10 @@ It can be used as a project specification, demonstration guide, or acceptance ch
 
 Phase 2A also provides an optional, independent read-only metadata API. Developers
 can check process/database readiness, list configured networks, query published
-property metadata and run guarded fictional fixtures. This API has no chain
-indexer or authenticated Studio actions yet; the existing React use cases below
+property metadata and run guarded fictional fixtures. Phase 2B.1 adds a separate
+local read-only indexer with verified deployment import, property reconciliation,
+restart/reorg/reset handling and freshness; see [indexer guide](docs/INDEXER.md).
+Authenticated Studio actions remain future; the existing React use cases below
 continue through RPC and wallet. See [API reference](docs/API.md) and
 [Phase 2A scope](docs/PHASE_2A.md).
 

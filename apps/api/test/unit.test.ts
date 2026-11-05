@@ -17,6 +17,7 @@ import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConne
 import { ConfigService } from '@nestjs/config';
 import { AssetsService } from '../src/assets/assets.module';
 import { PropertyAsset } from '../src/database/entities';
+import { SynchronizationService } from '../src/indexer/synchronization.module';
 
 const input = { NODE_ENV: 'test', DATABASE_URL: 'postgresql://test:unit-only@127.0.0.1/brickshare_test' };
 const env = validateEnvironment(input);
@@ -28,6 +29,7 @@ let fail = false;
 before(async () => {
   const module = await Test.createTestingModule({ controllers: [HealthController, PropertiesController], providers: [
     { provide: DatabaseService, useValue: { ready: async () => readyState } },
+    { provide: SynchronizationService, useValue: { status: async () => ({ mode: 'local_read_only', data: [] }) } },
     { provide: PropertiesService, useValue: {
       list: async (query: unknown) => { if (fail) throw new Error('private-password-and-query'); return { query }; },
       find: async () => { throw new NotFoundException('Property not found'); },
