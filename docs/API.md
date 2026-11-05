@@ -1,8 +1,8 @@
-# Phase 2A API: setup and reference
+# BrickShare API: setup and reference
 
 The optional service in `apps/api` is a NestJS/TypeScript modular monolith backed
-by PostgreSQL 16 and TypeORM. It is a read-only metadata foundation. No indexer,
-authentication, uploads, financial writes or frontend API dependency is included.
+by PostgreSQL 16 and TypeORM. It is a read-only metadata foundation with an optional
+Phase 2B.1 local indexing worker. Authentication, uploads, financial writes and a frontend API dependency are not included.
 The React application continues to use its existing RPC and wallet flows.
 
 ## Local setup
@@ -36,7 +36,8 @@ PostgreSQL 16 instance. Run commands from the repository root.
    Wait for the database to become healthy. The API listens at
    `http://127.0.0.1:3001`. No Hardhat node, wallet or RPC credential is required
    for these endpoints. An empty properties collection is the expected initial
-   result: this service does not yet ingest contract listings.
+   result until the optional worker runs. See [local indexing setup](INDEXER.md)
+   to import a verified Hardhat deployment and reconcile contract listings.
 
 4. Try the health and query endpoints in another terminal:
 
@@ -71,6 +72,10 @@ explicitly when necessary. Do not remove a volume containing data you need.
 | `npm run db:seed:fictional` | Explicitly guarded fictional metadata fixture |
 | `npm run test:api` | HTTP/configuration tests, no PostgreSQL required |
 | `npm run test:api:db` | Real PostgreSQL migration, constraint and HTTP query tests |
+| `npm run dev:indexer` | Run the separate local read-only worker |
+| `npm run indexer:once` | Catch up the local deployment and exit |
+| `npm run start:indexer` | Run the compiled worker after building |
+| `npm run test:indexer:live` | Isolated real Hardhat/PostgreSQL smoke test |
 
 The backend loads **only** `apps/api/.env`; existing process environment takes
 precedence. Root deployment secrets and frontend Vite env files are separate.
@@ -88,7 +93,7 @@ authenticated sessions. Connection acquisition and queries have bounded timeouts
 For a hosted API, provision PostgreSQL, inject environment through the host's
 secret manager, build with development dependencies present, run migrations in a
 controlled release step, and start the compiled API. Use a separate DDL migration
-role and a read-only runtime role with SELECT on the six tables and migration
+role and a read-only API runtime role with SELECT on the catalog/indexer tables and migration
 ledger. Automatic synchronization and startup migrations are disabled in **all**
 environments. The API can start without a database: liveness stays available,
 readiness returns 503 and database-backed endpoints return a redacted 503.
@@ -123,10 +128,13 @@ listing. Default queries exclude it; detail queries also require `source=fiction
 | `GET /api/v1/networks` | Enabled configured networks, numeric chain IDs encoded as strings; no RPC credentials |
 | `GET /api/v1/properties` | Paginated properties in one explicit source, with published metadata/assets only |
 | `GET /api/v1/properties/:id` | Property by internal UUID v4; 404 for missing record or wrong source |
+| `GET /api/v1/synchronization` | Local worker processing state, provenance, watermark, observed lag and heartbeat freshness |
 
 Readiness reports `checks.database` as `ready`, `database_unavailable` or
 `schema_pending`. It does not claim chain synchronization or validate every schema
-object against drift. `synchronization` is always `not_implemented` in Phase 2A.
+object against drift. `synchronization` now contains the local worker status object;
+before import it has `mode: local_read_only`, `authority: smart_contract`, `data: []`.
+DB readiness is independent of worker freshness. See [status semantics](INDEXER.md#api-synchronization-and-freshness).
 
 List query parameters:
 
@@ -153,9 +161,9 @@ Example default collection after migration and network seed:
   "data": [],
   "meta": {
     "source": "blockchain",
-    "synchronization": "not_implemented",
+    "synchronization": { "mode": "local_read_only", "authority": "smart_contract", "data": [] },
     "blockchainAuthority": "wallet_and_smart_contract",
-    "note": "No chain ingestion or independent snapshot verification is implemented by this API.",
+    "note": "Cached local-chain observations may lag or be reorganized. Wallet and smart-contract reads remain authoritative.",
     "page": 1,
     "limit": 20,
     "total": 0
@@ -164,11 +172,15 @@ Example default collection after migration and network seed:
 ```
 
 Every property has `id`, `source`, `isFictional`, `fixtureLabel`, `blockchain` and
-`metadata`. Fictional responses have `blockchain: null`. Blockchain rows, if
-deliberately populated by a trusted future importer, expose stored identity,
+`metadata`. Fictional responses have `blockchain: null`. Blockchain rows expose stored identity,
 name/location, supply, `tokenPriceWei`, active status and observed block/hash under
-`blockchain`, labeled `source: unverified_database_snapshot`, `verifiedByApi: false`.
-The API does not query RPC, certify freshness/finality, or calculate balances.
+`blockchain`. Worker-managed rows are labeled `reconciled_local_chain_snapshot`,
+with deployment instance identity and synchronization status. `verifiedByApi: true`
+describes reconciliation at the stored block, not current/finalized financial facts.
+Unmanaged rows stay `unverified_database_snapshot`, `verifiedByApi: false`; they
+are suppressed once that deployment has managed history. Invalidated/orphaned
+managed properties are excluded; historical metadata remains in PostgreSQL.
+The API itself does not query RPC, certify finality, or calculate balances.
 No command seeds fake deployments or chain-derived properties.
 
 Chain IDs, on-chain IDs, blocks, token quantities, wei and asset byte sizes are
@@ -210,6 +222,10 @@ The database name must end in `_test`. Integration tests create a random
 `test_<uuid>` schema, migrate/rollback/reapply inside it, test constraints and real
 HTTP queries, then remove only that schema. They never use `DATABASE_URL` as a
 fallback. CI provisions an ephemeral PostgreSQL service and runs these same checks.
+Indexer integration tests additionally exercise atomic interruption/restart,
+duplicate delivery, local resets, reorgs, constraints, provenance and freshness.
+`npm run test:indexer:live` needs root Hardhat dependencies and `npm run compile`;
+it starts its own disposable chain. See [indexer verification](INDEXER.md#verification).
 
 ## Future frontend integration boundary
 
@@ -219,8 +235,9 @@ No frontend files or wallet flows change in this phase. When integrating later:
    frontend default. Backend failure must preserve current RPC browsing and wallet
    behavior, with honest missing-metadata messaging.
 2. Match records by **chain ID + contract address + on-chain property ID**, never
-   an internal UUID alone or token ID alone. A reviewed deployment registry and
-   importer must establish this mapping first.
+   an internal UUID alone or token ID alone. The local deployment registry and
+   worker now record verified local deployment identity and isolated run/creation
+   history. Public-chain identity resolution and a frontend consumer remain future work.
 3. Use the API only for published descriptions/photos/public documents. Keep the
    current static metadata catalog as a separate fallback until migration is tested.
    API titles/locations must not silently replace authoritative contract facts.

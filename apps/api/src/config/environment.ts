@@ -17,6 +17,7 @@ export class Environment {
   @IsString() CORS_ORIGINS = 'http://localhost:5173,http://127.0.0.1:5173';
   @IsOptional() @IsString() ASSET_PUBLIC_BASE_URL?: string;
   @Transform(boolean) @IsBoolean() ALLOW_FICTIONAL_SEED = false;
+  @Transform(integer) @IsInt() @Min(1000) @Max(3600000) INDEXER_STALE_AFTER_MS = 30000;
 }
 
 export function validateEnvironment(input: Record<string, unknown>): Environment {

@@ -26,14 +26,21 @@ deployment secrets to a static frontend host.
 ## Optional Phase 2A backend
 
 The NestJS API adds PostgreSQL migrations, versioned metadata/public asset records,
-readiness checks and paginated read-only endpoints. It does not ingest the chain
-yet, so its default property collection starts empty. Fictional seed data is
+readiness checks and paginated read-only endpoints. Phase 2B.1 adds an optional
+local Hardhat indexing worker with verified deployment identity, reorg/reset
+handling and reconciled snapshots. Without the worker, its property collection
+starts empty. Fictional seed data is
 explicitly isolated and contains no prices or token balances.
 
 See [API setup and reference](docs/API.md) and
 [Phase 2A delivery notes and remaining work](docs/PHASE_2A.md).
 Start with `npm run setup:api`; backend configuration lives only in
 `apps/api/.env`. Running the backend is optional for the existing frontend.
+
+For worker startup, API freshness and local reset recovery, see the
+[Phase 2B.1 indexing guide](docs/INDEXER.md). The worker never signs transactions;
+React continues to use contract/RPC reads as its financial authority.
+See [Phase 2B.1 delivery and verification](docs/PHASE_2B_1.md) for the file inventory.
 
 ## How it works
 

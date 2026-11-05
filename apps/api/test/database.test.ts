@@ -47,14 +47,15 @@ after(async () => {
 test('migration is explicit, transactional, reversible and repeatable', async () => {
   const database = new DatabaseService(source, logger);
   assert.equal(await database.ready(), 'schema_pending');
-  assert.equal((await source.runMigrations({ transaction: 'all' })).length, 1);
+  assert.equal((await source.runMigrations({ transaction: 'all' })).length, 2);
   assert.equal(await database.ready(), 'ready');
   assert.equal((await source.runMigrations()).length, 0);
   await source.undoLastMigration({ transaction: 'all' });
   assert.equal(await database.ready(), 'schema_pending');
+  await source.undoLastMigration({ transaction: 'all' });
   const tables = await source.query('SELECT tablename FROM pg_tables WHERE schemaname=$1', [schema]);
   assert.deepEqual(tables.map((row: { tablename: string }) => row.tablename), ['api_migrations']);
-  assert.equal((await source.runMigrations({ transaction: 'all' })).length, 1);
+  assert.equal((await source.runMigrations({ transaction: 'all' })).length, 2);
 });
 test('network seed is idempotent and fictional seeding is explicitly guarded', async () => {
   await seedNetworks(source); await seedNetworks(source);

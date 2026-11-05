@@ -1,7 +1,8 @@
 # BrickShare API
 
 Optional NestJS modular monolith for BrickShare Invest and Studio. It does not sign
-transactions, hold funds, or synchronize the chain in Phase 2A.
+transactions or hold funds. The optional Phase 2B.1 worker reconciles local chain
+snapshots; see [indexer startup and recovery](../../docs/INDEXER.md).
 
 See [setup and HTTP API reference](../../docs/API.md),
 [architecture](../../docs/ARCHITECTURE.md) and
