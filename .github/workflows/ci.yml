@@ -13,6 +13,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  backend:
+    name: API tests, PostgreSQL migrations and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: brickshare_test
+          # Disposable CI-only database credential, never used by a deployed service.
+          POSTGRES_PASSWORD: ci-disposable-only
+          POSTGRES_DB: brickshare_api_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U brickshare_test -d brickshare_api_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://brickshare_test:ci-disposable-only@127.0.0.1:5432/brickshare_api_test
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - run: npm run setup:api
+      - run: npm run test:api
+      - run: npm run test:api:db
+      - run: npm run build:api
+
   contracts:
     name: Contracts and deployment configuration
     runs-on: ubuntu-latest

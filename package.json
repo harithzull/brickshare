@@ -7,6 +7,16 @@
     "node": ">=22.19.0 <23"
   },
   "scripts": {
+    "setup:api": "npm ci --prefix apps/api",
+    "dev:api": "npm --prefix apps/api run dev",
+    "build:api": "npm --prefix apps/api run build",
+    "start:api": "npm --prefix apps/api start",
+    "test:api": "npm --prefix apps/api test",
+    "test:api:db": "npm --prefix apps/api run test:db",
+    "db:migrate": "npm --prefix apps/api run db:migrate",
+    "db:revert": "npm --prefix apps/api run db:revert",
+    "db:seed:networks": "npm --prefix apps/api run db:seed:networks",
+    "db:seed:fictional": "npm --prefix apps/api run db:seed:fictional",
     "setup": "npm ci && npm ci --prefix react-frontend",
     "compile": "hardhat compile && node scripts/sync-frontend.js",
     "test": "hardhat test",

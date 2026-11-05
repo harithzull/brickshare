@@ -1,0 +1,7 @@
+FICTIONAL BRICKSHARE DEVELOPMENT FIXTURE
+
+Cedar House and Example City are fictional. This file is for testing metadata
+references and checksums only. It represents no real property, property title,
+investment, token deployment, valuation, income, or promise of return.
+
+The API stores a reference to this file. It does not serve or upload the file.

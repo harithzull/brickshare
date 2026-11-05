@@ -1,5 +1,8 @@
 # BrickShare 2.0 — Phase 1 delivery
 
+This is the historical Phase 1 record. The subsequent optional backend foundation
+is documented in [Phase 2A](PHASE_2A.md) and [API setup](API.md).
+
 ## Implemented scope
 
 The existing React application, Solidity contract, and wallet-based financial

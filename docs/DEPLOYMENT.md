@@ -9,6 +9,10 @@ No Base Sepolia contract is pre-populated in this repository.
 
 The supported network registry is [config/networks.json](../config/networks.json).
 
+For the optional Phase 2A backend, use the separate [API setup guide](API.md).
+Its database credentials live in `apps/api/.env` and are never needed by the
+contract deployer or public frontend. This guide's wallet/deployment flow is unchanged.
+
 | Target        | Chain ID | Default RPC                | Explorer                       |
 | ------------- | -------- | -------------------------- | ------------------------------ |
 | `localhost`   | 31337    | `http://127.0.0.1:8545`    | None                           |
