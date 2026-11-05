@@ -6,6 +6,11 @@ chain. React continues reading RPC and signing transactions independently.
 Base Sepolia/public indexing, auth, uploads, holdings APIs and cloud deployment
 are outside this phase.
 
+Phase 2B.2 adds optional frontend consumption of published metadata with independent
+RPC provenance checks and fallback. See [full-stack setup](PHASE_2B_2.md).
+The live smoke test now also runs the real Nest API and frontend typed client and
+requires frontend dependencies (`npm ci --prefix react-frontend`).
+
 ## Start locally (Windows CMD)
 
 Keep the API `.env` and existing PostgreSQL volume from Phase 2A. Do not overwrite

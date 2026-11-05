@@ -16,6 +16,13 @@ import { indexerSettings } from '../src/indexer/config';
 import { loadTarget } from '../src/indexer/identity';
 import { LocalRpc } from '../src/indexer/rpc';
 import { IndexingWorker } from '../src/indexer/worker';
+import { Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { AppModule } from '../src/app.module';
+import { configureHttp } from '../src/common/http';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 if (!databaseUrl || !new URL(databaseUrl).pathname.endsWith('_test')) throw new Error('TEST_DATABASE_URL must identify a dedicated database ending in _test.');
@@ -29,7 +36,7 @@ async function stop(child: ChildProcess) {
   if (child.exitCode !== null || child.signalCode !== null) return;
   const exited = once(child, 'exit'); child.kill(); await exited;
 }
-test('real Hardhat: verified import, transactions, worker process restart, reorg and reset', { timeout: 90000 }, async () => {
+test('full stack: real Hardhat, worker restart, Nest API, frontend metadata, reorg and reset', { timeout: 90000 }, async () => {
   const port = await freePort();
   const rpcUrl = `http://127.0.0.1:${port}`;
   const schema = 'test_' + randomUUID().replace(/-/g, '');
@@ -38,6 +45,7 @@ test('real Hardhat: verified import, transactions, worker process restart, reorg
   const node = spawn(process.execPath, [join(root, 'node_modules/hardhat/internal/cli/cli.js'), 'node', '--hostname', '127.0.0.1', '--port', String(port)], { cwd: root, windowsHide: true, stdio: 'ignore', env: { ...process.env, DEPLOYER_PRIVATE_KEY: '', ETHERSCAN_API_KEY: '' } });
   const rpc = new LocalRpc(rpcUrl, 2000);
   let provider: JsonRpcProvider | undefined;
+  let api: INestApplication | undefined;
   try {
     let started = false;
     for (let attempt = 0; attempt < 100; attempt++) {
@@ -79,6 +87,40 @@ test('real Hardhat: verified import, transactions, worker process restart, reorg
     await runProcess();
     assert.equal((await source.query('SELECT id FROM properties WHERE canonical_snapshot'))[0].id, first.id);
     assert.equal((await source.query('SELECT count(*) FROM chain_events'))[0].count, '4');
+    // Publish only an isolated test fixture through SQL; no write API is introduced.
+    await source.query(`INSERT INTO property_metadata_versions(property_id,version,state,title,description) VALUES($1,1,'published','TEST fixture title','Published full-stack test description')`, [first.id]);
+    const env = validateEnvironment({ NODE_ENV: 'test', DATABASE_URL: databaseUrl, DATABASE_SCHEMA: schema });
+    const module = await Test.createTestingModule({ imports: [AppModule.register(env as unknown as Record<string, unknown>)] }).overrideProvider(DataSource).useValue(source).overrideProvider(JsonLogger).useValue(logger).compile();
+    api = module.createNestApplication({ logger: false }); configureHttp(api, env, logger); await api.listen(0, '127.0.0.1');
+    // Native import preserves the frontend's typed modules without including them
+    // in the backend TypeScript output. Supported by the repository's Node 22.19.
+    const importFrontend = (name: string) => new Function('url', 'return import(url)')(pathToFileURL(join(root, 'react-frontend/src/lib', name)).href);
+    const { ApiClient, apiSettings } = await importFrontend('api-client.ts');
+    const { loadIndexedCatalog, mergeIndexedCatalog, integrationFailure } = await importFrontend('indexed-catalog.ts');
+    const { readProperties, purchaseCost } = await importFrontend('marketplace.js');
+    const ethers5 = createRequire(join(root, 'react-frontend/package.json'))('ethers').ethers;
+    const browserProvider = new ethers5.providers.JsonRpcProvider({ url: rpcUrl, timeout: 2000 }, 31337);
+    const browserContract = new ethers5.Contract(await contract.getAddress(), artifact.abi, browserProvider);
+    const listings = await readProperties(browserContract, await buyer.getAddress());
+    const client = new ApiClient(apiSettings({ VITE_API_BASE_URL: await api.getUrl() }));
+    const identity = { chainId: '31337', address: await contract.getAddress(), deploymentBlock: 1 };
+    const catalog = await loadIndexedCatalog({ client, chain: identity, rpc: browserProvider, codeHash: keccak256, selectedId: '1' });
+    const enriched = mergeIndexedCatalog(listings, catalog, 30000);
+    assert.equal(enriched[0].description, 'Published full-stack test description');
+    assert.equal(enriched[0].metadataInfo.source, 'api');
+    assert.equal(enriched[0].mine, '1');
+    assert.equal(purchaseCost(enriched[0], '3').toString(), '30000000000000003');
+    await source.query(`UPDATE indexer_cursors SET last_success_at=now()-interval '1 hour'`);
+    await assert.rejects(loadIndexedCatalog({ client, chain: identity, rpc: browserProvider, codeHash: keccak256 }), /indexer is behind/);
+    await source.query('UPDATE indexer_cursors SET last_success_at=now()');
+    const badIdentity = { ...identity, address: '0x1111111111111111111111111111111111111111' };
+    const noMatch = await loadIndexedCatalog({ client, chain: badIdentity, rpc: browserProvider, codeHash: keccak256 });
+    assert.equal(noMatch.records.length, 0);
+    const failedClient = new ApiClient(apiSettings({ VITE_API_BASE_URL: await api.getUrl() }), async () => { throw new Error('simulated outage'); });
+    let failure;
+    try { await loadIndexedCatalog({ client: failedClient, chain: identity, rpc: browserProvider, codeHash: keccak256 }); } catch (error) { failure = integrationFailure(error); }
+    const fallback = mergeIndexedCatalog(listings, failure, 30000);
+    assert.equal(fallback[0].sample, false); assert.equal(fallback[0].mine, '1'); assert.equal(purchaseCost(fallback[0], '3').toString(), '30000000000000003');
     const snapshot = await provider.send('evm_snapshot', []);
     await (await (contract.connect(buyer) as Contract).buyTokens(1n, 2n, { value: 20000000000000002n })).wait();
     await worker().tick();
@@ -100,7 +142,9 @@ test('real Hardhat: verified import, transactions, worker process restart, reorg
     assert.equal((await source.query('SELECT chain_name FROM properties WHERE canonical_snapshot'))[0].chain_name, 'After reset');
     assert.equal((await source.query('SELECT count(*) FROM deployment_instances'))[0].count, '2');
   } finally {
+    await api?.close();
     provider?.destroy(); await stop(node);
+    if (api && !source.isInitialized) await source.initialize();
     if (source.isInitialized) { assert.match(schema, /^test_[a-f0-9]{32}$/); await source.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`); await source.destroy(); }
     // mkdtemp created this exact directory; no repository manifests are touched.
     assert.equal(resolve(temp, '..'), resolve(tmpdir())); assert.match(temp.split(/[\\/]/).at(-1)!, /^brickshare-indexer-live-/);

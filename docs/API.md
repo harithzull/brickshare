@@ -2,7 +2,9 @@
 
 The optional service in `apps/api` is a NestJS/TypeScript modular monolith backed
 by PostgreSQL 16 and TypeORM. It is a read-only metadata foundation with an optional
-Phase 2B.1 local indexing worker. Authentication, uploads, financial writes and a frontend API dependency are not included.
+Phase 2B.1 local indexing worker and Phase 2B.2 optional frontend metadata client.
+Authentication, uploads and financial writes are not included. The frontend does
+not require this API to browse through RPC or transact.
 The React application continues to use its existing RPC and wallet flows.
 
 ## Local setup
@@ -227,26 +229,31 @@ duplicate delivery, local resets, reorgs, constraints, provenance and freshness.
 `npm run test:indexer:live` needs root Hardhat dependencies and `npm run compile`;
 it starts its own disposable chain. See [indexer verification](INDEXER.md#verification).
 
-## Future frontend integration boundary
+## Frontend integration boundary
 
-No frontend files or wallet flows change in this phase. When integrating later:
+Phase 2B.2 implements this boundary; see [full-stack setup](PHASE_2B_2.md).
+Wallet signing and financial calculations are unchanged:
 
-1. Add an optional public API base URL/feature flag; keep the current standalone
-   frontend default. Backend failure must preserve current RPC browsing and wallet
-   behavior, with honest missing-metadata messaging.
+1. `VITE_API_BASE_URL` opts into the public metadata client; blank keeps standalone
+   RPC browsing. Timeouts, failures and missing metadata have explicit fallback labels.
 2. Match records by **chain ID + contract address + on-chain property ID**, never
    an internal UUID alone or token ID alone. The local deployment registry and
    worker now record verified local deployment identity and isolated run/creation
-   history. Public-chain identity resolution and a frontend consumer remain future work.
+   history. The frontend also checks receipt/runtime, genesis, Hardhat run and
+   indexed block hashes. Public-chain indexing remains future work.
 3. Use the API only for published descriptions/photos/public documents. Keep the
    current static metadata catalog as a separate fallback until migration is tested.
    API titles/locations must not silently replace authoritative contract facts.
 4. Read price, supply, active status and connected-wallet balances from the
    selected contract; validate and sign purchases/transfers through the existing
    wallet. A database snapshot must never drive payment calculations.
-5. Use bounded requests and cancellation on account/network/property changes;
-   never replace real data with fictional source on API failure. Render metadata
-   as text and validate external asset links, not arbitrary HTML.
+5. Requests are bounded/cancelled across context changes. Metadata expires without
+   navigation; fictional records never replace RPC data. Operator text is escaped
+   and API asset URLs require external HTTPS without credentials.
+
+Synchronization provenance now includes public `hardhatInstanceId` and `genesisHash`
+from existing columns. This additive response change requires no database migration.
+Restart older API processes before enabling the updated frontend client.
 
 Invest consumes public presentation reads. Studio will use future SIWE-authenticated,
 scoped and audited draft/publication endpoints. Nothing in Phase 2A grants Studio

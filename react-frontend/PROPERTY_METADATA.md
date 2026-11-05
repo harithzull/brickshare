@@ -5,6 +5,13 @@ Optional presentation information lives in `src/data/property-metadata.json`.
 It is public and bundled with the frontend; updating it requires rebuilding.
 It is not an upload service or a verification system.
 
+Phase 2B.2 can also load published PostgreSQL metadata through the optional API.
+Verified API presentation fields take precedence where supplied; this file remains
+an explicitly labeled local fallback. API metadata is withheld on stale indexer,
+identity mismatch or API failure. Neither source overrides contract financial fields.
+See [integration setup](../docs/PHASE_2B_2.md). Review local entries after resets that
+reuse an address/token ID; this legacy static format has no chain-instance binding.
+
 Key each entry by `chainId:lowercaseContractAddress:propertyId` so metadata does
 not accidentally follow the same property ID to a different deployment address:
 

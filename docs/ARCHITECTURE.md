@@ -3,6 +3,8 @@
 **Status:** Phase 2A implements the optional NestJS/PostgreSQL foundation. Phase
 2B.1 adds a separate local-only read-only worker, verified deployment incarnations,
 block/event history, atomic cursors, reconciled property snapshots and API freshness.
+Phase 2B.2 adds a typed optional frontend catalog/metadata client, provenance and
+freshness checks, explicit source labels and RPC fallback. See [full-stack integration](PHASE_2B_2.md).
 Authentication, public-chain indexing, durable portfolio/activity projections,
 write APIs and object storage remain proposed. See [indexer design/setup](INDEXER.md),
 [Phase 2A decisions](PHASE_2A.md) and [API reference](API.md).
@@ -25,7 +27,7 @@ Browser wallet ---> selected chain     Object storage   Indexer worker ---> RPC
 ```
 
 Phase 1 remains backend-independent: browser reads continue through the selected
-RPC. A future API can accelerate browsing/history without becoming a custody or
+RPC. The optional API now supplies presentation metadata without becoming a custody or
 transaction-signing service. The design applies to localhost and Base Sepolia;
 mainnet is outside the current implementation scope.
 
@@ -181,8 +183,14 @@ Phase 2A implements `/health/live`, `/health/ready`, `/api/v1/networks`,
 and real PostgreSQL tests. Queries separate off-chain metadata from unverified
 stored snapshots; the optional local worker now supplies reconciled observations.
 `/api/v1/synchronization` exposes processing/freshness/provenance and is also
-embedded in property responses and DB readiness. The frontend does not consume
-these routes. See [API.md](API.md) for their exact current contract.
+embedded in property responses and DB readiness. Phase 2B.2's optional frontend
+client consumes networks, synchronization, listing and detail routes for published
+metadata. It verifies the chain/address/token tuple, receipt/runtime/genesis/run
+and indexed-block provenance through RPC, then merges only presentation fields.
+All financial values and wallet operations remain RPC/contract-owned. A stale or
+unavailable API leaves the existing RPC catalog and transaction flow intact.
+See [API.md](API.md) for the response contract and [PHASE_2B_2.md](PHASE_2B_2.md)
+for freshness rules, bounds, local setup and limitations.
 
 The broader routes below remain the **future** proposal; the eventual version
 prefix will align with `/api/v1`. Deployment-scoped and authentication routes are

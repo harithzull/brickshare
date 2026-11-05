@@ -6,7 +6,10 @@ See [DESIGN.md](DESIGN.md) for the page/component structure, visual system,
 accessibility behavior, and trust boundaries.
 For Base Sepolia, public env variables and static hosting, follow the
 [Phase 1 deployment guide](../docs/DEPLOYMENT.md). The current frontend remains
-backend-independent; the NestJS/PostgreSQL service is a future design only.
+backend-independent for financial reads and wallet transactions. Phase 2B.2 adds
+an optional typed metadata API client: set public `VITE_API_BASE_URL` in `.env.local`
+and restart Vite. See [full-stack CMD setup](../docs/PHASE_2B_2.md) for data sources,
+stale metadata handling and API/indexer troubleshooting.
 
 Visitors can browse live listings without connecting a wallet. The marketplace
 includes search, filters, property details and an explicit fictional sample

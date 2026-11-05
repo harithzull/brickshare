@@ -7,6 +7,7 @@ import {
 } from "../lib/marketplace";
 import PropertyArt from "../components/PropertyArt";
 import Icon from "../components/Icon";
+import PropertyMetadataStatus from "../components/PropertyMetadataStatus";
 import {
   Button,
   Notice,
@@ -79,6 +80,7 @@ export default function PropertyDetailsPage({ property, app, navigate }) {
       )}
       <div className="detail-grid">
         <div className="research-content">
+          <PropertyMetadataStatus property={property} detailed />
           <div className="detail-image">
             <PropertyArt property={property} />
           </div>

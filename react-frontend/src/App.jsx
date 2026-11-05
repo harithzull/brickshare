@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import TransactionModal from "./components/TransactionModal";
 import TransactionStatus from "./components/TransactionStatus";
+import MetadataServiceStatus from "./components/MetadataServiceStatus";
 import { Button, EmptyState, LoadingSkeleton, Notice } from "./components/ui";
 import HomePage from "./pages/HomePage";
 import MarketplacePage from "./pages/MarketplacePage";
@@ -18,7 +19,7 @@ const AdminPage = lazy(() => import("./pages/AdminPage"));
 
 export default function App() {
   const { route, navigate } = useNavigation();
-  const app = useBrickShare({ mode: route.mode });
+  const app = useBrickShare({ mode: route.mode, propertyId: route.page === "property" ? route.id : null });
   const { market } = app;
   const firstRender = useRef(true);
   const snapshot = useRef({ source: null, properties: [] });
@@ -125,6 +126,7 @@ export default function App() {
             Preparing your transaction and estimating the network fee…
           </Notice>
         )}
+        {route.mode !== "sample" && market.status === "ready" && <MetadataServiceStatus metadata={market.metadata} readAt={market.readAt} />}
         <Suspense
           fallback={
             <div className="page">
