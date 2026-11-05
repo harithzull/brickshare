@@ -1,0 +1,10 @@
+DROP TABLE property_assets;
+DROP TABLE public_assets;
+DROP TABLE property_metadata_versions;
+DROP TABLE properties;
+DROP TABLE contract_deployments;
+DROP TABLE chains;
+DROP FUNCTION metadata_version_guard();
+DROP FUNCTION metadata_link_guard();
+DROP FUNCTION published_asset_guard();
+DROP FUNCTION touch_updated_at();

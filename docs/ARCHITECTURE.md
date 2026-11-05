@@ -1,8 +1,10 @@
-# BrickShare 2.0 — Hybrid architecture proposal
+# BrickShare 2.0 — Hybrid architecture
 
-**Status:** technical design for the upcoming backend. Phase 1 implements network,
-deployment, build and CI foundations only. No NestJS service, database schema,
-authentication server, indexer, or backend endpoints are running yet.
+**Status:** Phase 2A implements the optional NestJS/PostgreSQL read-only foundation:
+six catalog entities, explicit SQL migrations, metadata queries and health checks.
+Authentication, chain ingestion, portfolio/activity projections, write APIs and
+object storage remain proposed. See [Phase 2A decisions](PHASE_2A.md) for the
+implementation scope/discrepancies and [API setup](API.md) for current endpoints.
 
 ## 1. Architectural decision
 
@@ -68,8 +70,9 @@ ORM floating-point conversions. See [Nest database integration](https://docs.nes
 
 ## 4. Entity model
 
-All tables below are **proposed**. Deployment IDs are database UUIDs; a property's
-on-chain ID is a separate uint256. Never identify a property by token ID alone.
+The six network/property/asset tables below are implemented in Phase 2A; identity,
+authentication and projection tables remain **proposed**. Internal IDs are UUIDs;
+a property's on-chain ID is a separate uint256. Never identify a property by token ID alone.
 
 ### Identity, authentication and administration
 
@@ -90,12 +93,12 @@ Apply equivalent 32-byte constraints to hashes.
 
 | Entity                  | Key fields and constraints                                                                                                                                                                               |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Chain                   | `chain_id bigint` PK; public name/explorer; enabled flag. Privileged RPC credentials stay in process configuration, not public rows.                                                                     |
+| Chain                   | UUID PK; unique positive `chain_id bigint`; public name/explorer; enabled flag. Privileged RPC credentials stay in process configuration, not public rows. |
 | ContractDeployment      | UUID PK; chain FK; 20-byte address; deployment block/hash; 32-byte transaction hash; ABI/artifact version and hash; observed owner address; release reference; unique `(chain_id,address)`.              |
-| Property                | UUID PK; deployment FK; `on_chain_id numeric(78,0)`; chain-derived name/location/total/available/priceWei/active; observed block/hash; unique `(deployment_id,on_chain_id)`.                             |
-| PropertyMetadataVersion | UUID PK; property FK; monotonically increasing version; description; draft/published/archived state; author FK; timestamps; unique `(property_id,version)`; one selected published version per property. |
-| Asset                   | UUID PK; public object-storage key; MIME type, byte size, checksum, kind (image/document), publication state; created-by FK. No secret URLs or private investor files in the public asset catalog.       |
-| PropertyAsset           | Metadata-version FK + asset FK; purpose, alt text, caption, display order. Keep historical metadata references reproducible.                                                                             |
+| Property                | UUID PK; source; deployment FK; `on_chain_id numeric(78,0)`; chain-derived name/location/total/available/priceWei/active; observed block/hash; unique `(deployment_id,on_chain_id)`. Fictional fixtures have all chain fields null. |
+| PropertyMetadataVersion | UUID PK; property FK; sequential version; description/title/location; draft/published/archived state; nullable unverified author reference (future User FK); timestamps; unique `(property_id,version)`; at most one published version. |
+| Asset                   | UUID PK in `public_assets`; public object-storage key; MIME type, byte size, checksum, kind, publication state; nullable unverified creator reference (future User FK). Public files only. |
+| PropertyAsset           | UUID PK; metadata-version FK + asset FK unique pair; purpose, alt text, caption, display order. Published historical references are immutable. |
 
 Chain-derived properties may exist without operator metadata. Present missing
 descriptions/documents honestly and retain labeled illustrations as fallback.
@@ -161,8 +164,15 @@ indexer must label its own potentially lagging/finality-filtered view explicitly
 
 ## 6. Proposed API boundary
 
-All routes below are **future**, versioned under `/v1`, and need implementation
-and integration tests in a later phase.
+Phase 2A implements `/health/live`, `/health/ready`, `/api/v1/networks`,
+`/api/v1/properties` and `/api/v1/properties/:id` (internal UUID), with validation
+and real PostgreSQL tests. Queries separate off-chain metadata from unverified
+stored snapshots; no synchronization exists yet. The frontend does not consume
+these routes. See [API.md](API.md) for their exact current contract.
+
+The broader routes below remain the **future** proposal; the eventual version
+prefix will align with `/api/v1`. Deployment-scoped and authentication routes are
+not implemented by Phase 2A.
 
 | Method/path                                                            | Access                                | Responsibility                                                                      |
 | ---------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |

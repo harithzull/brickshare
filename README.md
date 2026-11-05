@@ -15,7 +15,7 @@ deployments, validated public frontend configuration, source verification, and
 credential-free CI. Solidity behavior and owner permissions are unchanged.
 
 - [Deployment and hosted-testnet guide](docs/DEPLOYMENT.md)
-- [NestJS + PostgreSQL technical design](docs/ARCHITECTURE.md) — proposal only; no backend is implemented yet.
+- [NestJS + PostgreSQL architecture](docs/ARCHITECTURE.md) — Phase 2A foundation implemented; indexing and authentication remain planned.
 - [Phase 1 delivery and verification](docs/PHASE_1.md)
 
 Signing/explorer credentials belong only in an ignored root `.env` based on
@@ -23,14 +23,28 @@ Signing/explorer credentials belong only in an ignored root `.env` based on
 `react-frontend/.env.example` or `.env.testnet.example`. Never supply private
 deployment secrets to a static frontend host.
 
+## Optional Phase 2A backend
+
+The NestJS API adds PostgreSQL migrations, versioned metadata/public asset records,
+readiness checks and paginated read-only endpoints. It does not ingest the chain
+yet, so its default property collection starts empty. Fictional seed data is
+explicitly isolated and contains no prices or token balances.
+
+See [API setup and reference](docs/API.md) and
+[Phase 2A delivery notes and remaining work](docs/PHASE_2A.md).
+Start with `npm run setup:api`; backend configuration lives only in
+`apps/api/.env`. Running the backend is optional for the existing frontend.
+
 ## How it works
 
 ```text
 React frontend -> ethers.js -> MetaMask -> Hardhat blockchain -> Solidity contract
 ```
 
-There is no separate backend or database. The contract stores listings, token
-balances, and purchase funds. The deployment wallet is the administrator.
+The contract stores listings, token balances, and purchase funds. The deployment
+wallet is the administrator. The optional Phase 2A NestJS/PostgreSQL service stores
+versioned presentation metadata; the frontend still reads directly from the chain
+and runs independently of this service.
 
 The marketplace can read live listings through a read-only RPC without MetaMask.
 Search by name/location and filter by location or availability, then open a
@@ -164,7 +178,7 @@ Builds work without a local deployment, but wallet actions require deployment.
 For a production-build demo, deploy before building; deployment metadata is
 embedded in the frontend bundle at build time.
 
-The backend tooling uses ethers v6 through Hardhat, while the React application
+The contract deployment tooling uses ethers v6 through Hardhat, while the React application
 uses ethers v5. Keep dependencies in their respective packages.
 
 The default network is localhost, with read-only RPC `http://127.0.0.1:8545`.
@@ -187,7 +201,9 @@ contracts/                 Solidity contract
 scripts/                   Deployment and frontend configuration generation
 config/                    Public network registry and Node-only deployment configuration
 deployments/               Reviewed public testnet deployment records (once deployed)
-docs/                      Deployment, Phase 1 delivery and future backend design
+docs/                      Deployment, architecture, API setup and delivery notes
+apps/api/                  Optional NestJS + PostgreSQL metadata foundation
+compose.yaml               Local PostgreSQL 16 (backend only)
 .github/workflows/         Tests/builds only; no automatic deployment or secrets
 test/                      Active real estate contract tests
 ignition/modules/          Optional Ignition deployment module
@@ -196,7 +212,7 @@ react-frontend/            Main React + Vite application
 archive/                   Historical HTML frontends and unused sample test
 ```
 
-Commit both `package-lock.json` files and the generated ABI. Dependency folders,
+Commit all three `package-lock.json` files and the generated ABI. Dependency folders,
 build output, Hardhat artifacts/cache, and local deployment state are ignored.
 After intentionally changing dependencies, update the relevant lockfile with
 `npm install` in that package.

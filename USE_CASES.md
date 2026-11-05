@@ -4,6 +4,13 @@ This document describes the current BrickShare real estate tokenization demo.
 It covers the React application, Solidity contract, and local developer workflow.
 It can be used as a project specification, demonstration guide, or acceptance checklist.
 
+Phase 2A also provides an optional, independent read-only metadata API. Developers
+can check process/database readiness, list configured networks, query published
+property metadata and run guarded fictional fixtures. This API has no chain
+indexer or authenticated Studio actions yet; the existing React use cases below
+continue through RPC and wallet. See [API reference](docs/API.md) and
+[Phase 2A scope](docs/PHASE_2A.md).
+
 ## 1. Scope and implementation status
 
 BrickShare lets visitors browse property listings, connect a wallet, purchase

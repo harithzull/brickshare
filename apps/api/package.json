@@ -1,0 +1,45 @@
+{
+  "name": "@brickshare/api",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.19.0 <23"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-sql.cjs",
+    "dev": "node --watch -r ts-node/register src/main.ts",
+    "start": "node dist/src/main.js",
+    "test": "npm run build && node --test dist/test/unit.test.js",
+    "test:db": "npm run build && node --test --test-concurrency=1 dist/test/database.test.js",
+    "db:migrate": "ts-node src/database/cli.ts migrate",
+    "db:revert": "ts-node src/database/cli.ts revert",
+    "db:seed:networks": "ts-node src/database/cli.ts networks",
+    "db:seed:fictional": "ts-node src/database/cli.ts fictional"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.3.3",
+    "@nestjs/config": "^12.1.0",
+    "@nestjs/core": "^12.3.3",
+    "@nestjs/platform-express": "^12.3.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typeorm": "0.3.31"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^12.3.3",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.19.0",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3"
+  },
+  "overrides": {
+    "typeorm": {
+      "glob": "14.0.3"
+    }
+  }
+}
