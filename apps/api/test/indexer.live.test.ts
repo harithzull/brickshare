@@ -8,7 +8,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { ContractFactory, Contract, JsonRpcProvider, keccak256 } from 'ethers';
+import { ContractFactory, Contract, JsonRpcProvider, keccak256, Wallet } from 'ethers';
 import { apiRoot, validateEnvironment } from '../src/config/environment';
 import { createDataSource } from '../src/database/data-source';
 import { JsonLogger } from '../src/common/json-logger';
@@ -103,6 +103,26 @@ test('full stack: real Hardhat, worker restart, Nest API, frontend metadata, reo
     const browserContract = new ethers5.Contract(await contract.getAddress(), artifact.abi, browserProvider);
     const listings = await readProperties(browserContract, await buyer.getAddress());
     const client = new ApiClient(apiSettings({ VITE_API_BASE_URL: await api.getUrl() }));
+    // Exercise the real SIWE/private frontend client over HTTP alongside public reads.
+    // Node fetch needs an explicit test-only cookie jar; browsers manage HttpOnly cookies.
+    const { AuthClient } = await importFrontend('api-auth.ts');
+    const cookies = new Map<string, string>();
+    const cookieFetch = async (url: string, options: RequestInit) => {
+      const response = await fetch(url, { ...options, headers: { ...options.headers, Origin: env.AUTH_ORIGIN, Cookie: [...cookies].map(([key, value]) => `${key}=${value}`).join('; ') } });
+      for (const cookie of response.headers.getSetCookie()) {
+        const pair = cookie.split(';')[0]; const separator = pair.indexOf('='); const key = pair.slice(0, separator); const value = pair.slice(separator + 1);
+        if (!value) cookies.delete(key); else cookies.set(key, value);
+      }
+      return response;
+    };
+    const auth = new AuthClient(apiSettings({ VITE_API_BASE_URL: await api.getUrl() }), env.AUTH_ORIGIN, cookieFetch);
+    const loginWallet = Wallet.createRandom(); // Unfunded ephemeral EOA; never used for transactions.
+    const challenge = await auth.nonce(loginWallet.address, 31337);
+    await auth.verify(challenge, await loginWallet.signMessage(challenge.message));
+    const session = await auth.me(); assert.equal(session.authenticated, true); assert.equal(session.user.platformRole, 'investor');
+    const organization = (await auth.createOrganization('FICTIONAL full-stack Studio')).data;
+    assert.equal(organization.role, 'owner'); assert.equal((await auth.members(organization.id)).data.length, 1);
+    await auth.logout(); assert.equal((await auth.me()).authenticated, false);
     const identity = { chainId: '31337', address: await contract.getAddress(), deploymentBlock: 1 };
     const catalog = await loadIndexedCatalog({ client, chain: identity, rpc: browserProvider, codeHash: keccak256, selectedId: '1' });
     const enriched = mergeIndexedCatalog(listings, catalog, 30000);

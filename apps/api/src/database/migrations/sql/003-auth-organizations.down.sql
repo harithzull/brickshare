@@ -1,0 +1,12 @@
+DROP TABLE auth_rate_limits;
+DROP TABLE security_audit_logs;
+DROP TABLE organization_invitations;
+DROP TABLE organization_memberships;
+DROP TABLE organizations;
+DROP TABLE sessions;
+DROP TABLE auth_challenges;
+DROP TABLE wallet_identities;
+DROP TABLE users;
+DROP FUNCTION audit_append_only();
+DROP FUNCTION membership_last_owner();
+DROP FUNCTION organization_requires_owner();

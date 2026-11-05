@@ -1,13 +1,17 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import useBrickShare from "./hooks/useBrickShare";
 import useNavigation from "./hooks/useNavigation";
+import useWalletSession from "./hooks/useWalletSession";
+import { AuthClient } from "./lib/api-auth.ts";
+import { apiSettings } from "./lib/api-client.ts";
 import { sampleProperties } from "./data/samples";
-import { EXPECTED_CHAIN_ID } from "./config";
+import { EXPECTED_CHAIN_ID, CHAIN } from "./config";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import TransactionModal from "./components/TransactionModal";
 import TransactionStatus from "./components/TransactionStatus";
 import MetadataServiceStatus from "./components/MetadataServiceStatus";
+import WalletSessionPanel from "./components/WalletSessionPanel";
 import { Button, EmptyState, LoadingSkeleton, Notice } from "./components/ui";
 import HomePage from "./pages/HomePage";
 import MarketplacePage from "./pages/MarketplacePage";
@@ -16,10 +20,14 @@ import "./App.css";
 const PropertyDetailsPage = lazy(() => import("./pages/PropertyDetailsPage"));
 const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
+const OrganizationsPage = lazy(() => import("./pages/OrganizationsPage"));
+let sessionClient = null;
+try { sessionClient = new AuthClient(apiSettings(import.meta.env, CHAIN.networkName), typeof window === 'undefined' ? 'http://127.0.0.1:5173' : window.location.origin); } catch { /* Public browsing and transactions stay independent. */ }
 
 export default function App() {
   const { route, navigate } = useNavigation();
   const app = useBrickShare({ mode: route.mode, propertyId: route.page === "property" ? route.id : null });
+  const auth = useWalletSession({ client: sessionClient, wallet: app.wallet, expectedChainId: EXPECTED_CHAIN_ID });
   const { market } = app;
   const firstRender = useRef(true);
   const snapshot = useRef({ source: null, properties: [] });
@@ -51,6 +59,7 @@ export default function App() {
       marketplace: "Explore properties",
       portfolio: "Your portfolio",
       admin: "Administration",
+      organizations: "Organizations",
       property: property?.name || "Property details",
     };
     document.title = `${titles[route.page]} · BrickShare`;
@@ -91,7 +100,7 @@ export default function App() {
       >
         Skip to content
       </a>
-      <Navbar route={route} app={app} />
+      <Navbar route={route} app={{ ...app, disconnect: () => { auth.disconnect(); app.disconnect(); } }} auth={auth} />
       <main
         id="main"
         tabIndex="-1"
@@ -101,6 +110,7 @@ export default function App() {
             : "main-container"
         }
       >
+        <WalletSessionPanel auth={auth} app={app} navigate={navigate} />
         {app.notice && (
           <Notice
             tone={
@@ -196,6 +206,7 @@ export default function App() {
             <PortfolioPage app={app} navigate={navigate} />
           )}
           {route.page === "admin" && <AdminPage app={app} />}
+          {route.page === "organizations" && <OrganizationsPage key={auth.session?.user.id || 'anonymous'} auth={auth} />}
         </Suspense>
       </main>
       <Footer />

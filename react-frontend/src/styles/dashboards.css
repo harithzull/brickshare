@@ -677,3 +677,11 @@ tbody tr:last-child td {
 .sensitive-section .button {
   margin-top: 12px;
 }
+.session-panel { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 18px 24px; margin: 24px 0; }
+.session-panel p { margin: 6px 0; }
+.session-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.organization-section { padding: 24px; margin: 20px 0; }
+.organization-section form { display: grid; gap: 10px; max-width: 540px; margin: 18px 0; }
+.organization-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid var(--line); padding: 14px 0; flex-wrap: wrap; }
+.organizations-page > select { max-width: 540px; }
+@media (max-width: 760px) { .session-panel { align-items: flex-start; flex-direction: column; } }

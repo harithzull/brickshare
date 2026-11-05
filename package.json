@@ -7,6 +7,7 @@
     "node": ">=22.19.0 <23"
   },
   "scripts": {
+    "auth:platform-admin": "npm --prefix apps/api run auth:platform-admin --",
     "dev:indexer": "npm --prefix apps/api run worker:dev",
     "start:indexer": "npm --prefix apps/api run worker:start",
     "indexer:once": "npm --prefix apps/api run worker:once",

@@ -15,7 +15,7 @@ deployments, validated public frontend configuration, source verification, and
 credential-free CI. Solidity behavior and owner permissions are unchanged.
 
 - [Deployment and hosted-testnet guide](docs/DEPLOYMENT.md)
-- [NestJS + PostgreSQL architecture](docs/ARCHITECTURE.md) — local indexing and optional frontend metadata integration implemented; authentication remains planned.
+- [NestJS + PostgreSQL architecture](docs/ARCHITECTURE.md) — local indexing, optional frontend metadata, wallet authentication and organization roles implemented.
 - [Phase 1 delivery and verification](docs/PHASE_1.md)
 
 Signing/explorer credentials belong only in an ignored root `.env` based on
@@ -48,6 +48,15 @@ in `react-frontend/.env.local`, then restart Vite. RPC still supplies every pric
 supply, wallet balance and transaction input. Stale/mismatched API metadata is
 withheld; API failure leaves RPC browsing and wallet actions available.
 See the [full-stack CMD startup and troubleshooting guide](docs/PHASE_2B_2.md).
+
+Phase 2C adds optional SIWE wallet sign-in, HttpOnly cookie sessions and private
+organization workspaces with owner/editor/viewer permissions. Connecting a wallet,
+signing in, and approving a contract transaction are separate actions. Public RPC
+browsing and contract transactions continue without an API session. Organization
+roles never grant contract-owner or platform-admin privileges.
+See [Phase 2C setup, security decisions and API reference](docs/PHASE_2C.md).
+Existing installations must run `npm run db:migrate` and use matching frontend/API
+hostnames: open **http://127.0.0.1:5173** with the default authentication settings.
 
 ## How it works
 

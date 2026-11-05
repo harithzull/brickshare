@@ -45,9 +45,12 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix react-frontend
       - run: npm run compile
-      - run: npm run test:api
-      - run: npm run test:api:db
-      - run: npm run test:indexer:live
+      - name: API and SIWE security unit tests
+        run: npm run test:api
+      - name: PostgreSQL migrations, authentication and tenant isolation tests
+        run: npm run test:api:db
+      - name: Real local-chain integration and HTTP wallet login
+        run: npm run test:indexer:live
       - run: npm run build:api
 
   contracts:
@@ -84,7 +87,8 @@ jobs:
           cache: npm
           cache-dependency-path: react-frontend/package-lock.json
       - run: npm ci --prefix react-frontend
-      - run: npm run test:frontend
+      - name: Frontend metadata, wallet session and transaction compatibility tests
+        run: npm run test:frontend
       - run: npm run build
       - name: Validate hosted-testnet build path with public test configuration
         run: npm run build:testnet

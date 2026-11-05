@@ -5,8 +5,11 @@
 block/event history, atomic cursors, reconciled property snapshots and API freshness.
 Phase 2B.2 adds a typed optional frontend catalog/metadata client, provenance and
 freshness checks, explicit source labels and RPC fallback. See [full-stack integration](PHASE_2B_2.md).
-Authentication, public-chain indexing, durable portfolio/activity projections,
-write APIs and object storage remain proposed. See [indexer design/setup](INDEXER.md),
+Phase 2C implements EOA SIWE sessions and multi-tenant organizations with
+server-enforced roles, wallet-bound invitations and security audit logs. See
+[Phase 2C implementation/security specification](PHASE_2C.md). Public-chain indexing,
+durable portfolio/activity projections, property write APIs and object storage
+remain proposed. See [indexer design/setup](INDEXER.md),
 [Phase 2A decisions](PHASE_2A.md) and [API reference](API.md).
 
 ## 1. Architectural decision
@@ -73,8 +76,11 @@ ORM floating-point conversions. See [Nest database integration](https://docs.nes
 
 ## 4. Entity model
 
-The six network/property/asset tables below are implemented in Phase 2A; identity,
-authentication and holdings/session tables remain **proposed**. Phase 2B.1 also
+The six network/property/asset tables below are implemented in Phase 2A. Phase 2C
+implements users, wallet identities, challenges, sessions, organizations,
+memberships, invitations, security audit logs and database-backed rate limits.
+OperatorGrant, deployment-scoped content publication and holdings remain
+**proposed**; organization roles do not implicitly create these grants. Phase 2B.1 also
 implements deployment instances, blocks, events and cursors (see below). Internal IDs are UUIDs;
 a property's on-chain ID is a separate uint256. Never identify a property by token ID alone.
 
@@ -192,9 +198,11 @@ unavailable API leaves the existing RPC catalog and transaction flow intact.
 See [API.md](API.md) for the response contract and [PHASE_2B_2.md](PHASE_2B_2.md)
 for freshness rules, bounds, local setup and limitations.
 
-The broader routes below remain the **future** proposal; the eventual version
-prefix will align with `/api/v1`. Deployment-scoped and authentication routes are
-not implemented by Phase 2A.
+The broader routes below remain the **future** proposal except health/network
+reads already described above. Phase 2C supersedes the proposed authentication
+paths with `/api/v1/auth/nonce`, `/api/v1/auth/verify`, `/api/v1/auth/logout` and
+`/api/v1/me`, plus tenant-scoped organization endpoints documented in
+[PHASE_2C.md](PHASE_2C.md). Deployment-scoped CMS routes remain unimplemented.
 
 | Method/path                                                            | Access                                | Responsibility                                                                      |
 | ---------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -245,6 +253,27 @@ Public holdings endpoints reveal only already-public chain data, not user profil
 or verified wallet-to-person associations.
 
 ## 7. Wallet authentication and authorization
+
+Implemented Phase 2C: AuthModule owns identity/session services; OrganizationsModule
+owns tenant membership and invitations. No new UsersModule or content AdminModule
+is needed yet. Migration `1731200000000` adds explicit SQL constraints and indexes.
+All private queries require a fresh session and explicit organization membership;
+platform administrators can list organization names/IDs but cannot bypass tenant
+member/audit guards. Last-owner changes serialize on the organization row and have
+a database trigger safeguard. Isolation is enforced by application queries, not
+PostgreSQL row-level security. Existing public property metadata is not retroactively
+assigned to a tenant or authenticated author.
+
+SIWE 3 verifies exact server-issued messages for EOAs only. ERC-1271/6492 support
+requires a separate chain-aware verifier and tests; unsupported signatures fail
+closed. Browser-bound single-use challenges expire after five minutes; opaque
+sessions expire after one hour by default, with only token hashes stored in DB.
+Mutations require exact Origin, JSON, a custom header and CSRF verification.
+HttpOnly/SameSite=Strict cookies are host-only; secure HTTPS cookies use `__Host-`.
+The browser validates the message before prompting and clears application roles
+on account/network changes. Server revocation on these events is best effort
+when offline; fixed expiry remains enforced on every private backend request.
+The contract deployer never receives an implicit platform administrator grant.
 
 Use [ERC-4361 Sign-In with Ethereum](https://eips.ethereum.org/EIPS/eip-4361)
 for off-chain sessions. Bind the signature to an allowed domain, URI, chain,
