@@ -6,6 +6,7 @@ import {
   EXPECTED_CHAIN_ID,
   RPC_URL,
   DEPLOYMENT_BLOCK,
+  CHAIN,
 } from "../config";
 import metadata from "../data/property-metadata.json";
 import { readProperties, readActivity } from "../lib/marketplace";
@@ -59,7 +60,9 @@ export default function useMarketplace(account) {
         throw new Error("Read-only RPC is on the wrong network.");
       if ((await provider.getCode(CONTRACT_ADDRESS)) === "0x")
         throw new Error(
-          "No contract exists at the configured address. Redeploy after restarting the local chain."
+          CHAIN.networkName === "localhost"
+            ? "No contract exists at the configured address. Redeploy after restarting the local chain."
+            : "No contract exists at the selected Base Sepolia address. Check the public deployment configuration."
         );
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
@@ -121,7 +124,9 @@ export default function useMarketplace(account) {
           status: "error",
           error: error.message.includes("No contract")
             ? error.message
-            : "The property network is unavailable. Check that the local blockchain is running and the contract has been deployed, then retry.",
+            : CHAIN.networkName === "localhost"
+            ? "The local property network is unavailable. Start the local blockchain, check the deployment, and retry."
+            : "The Base Sepolia property network is unavailable. Retry shortly or check your connection and public RPC configuration.",
           properties: [],
           owner: null,
           balance: "0",

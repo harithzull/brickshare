@@ -5,7 +5,7 @@ import {
   CONTRACT_ABI,
   EXPECTED_CHAIN_ID,
   NETWORK_NAMES,
-  RPC_URL,
+  WALLET_NETWORK,
 } from "../config";
 import {
   positiveInteger,
@@ -14,6 +14,7 @@ import {
   shortAddress,
 } from "../lib/marketplace";
 import useMarketplace from "./useMarketplace";
+import { switchToConfiguredChain } from "../lib/chain-config";
 
 const networkName =
   NETWORK_NAMES[EXPECTED_CHAIN_ID] || `Chain ${EXPECTED_CHAIN_ID}`;
@@ -94,29 +95,7 @@ export default function useBrickShare({ mode = "live" }) {
     try {
       if (!window.ethereum)
         throw new Error("Install a browser wallet to switch networks.");
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(EXPECTED_CHAIN_ID) }],
-        });
-      } catch (error) {
-        if (error.code !== 4902 || EXPECTED_CHAIN_ID !== 31337) throw error;
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: "0x7a69",
-              chainName: "Hardhat Local",
-              rpcUrls: [RPC_URL],
-              nativeCurrency: {
-                name: "Test Ether",
-                symbol: "ETH",
-                decimals: 18,
-              },
-            },
-          ],
-        });
-      }
+      await switchToConfiguredChain(window.ethereum, WALLET_NETWORK);
       setNotice("Network selected. Connect your wallet to continue.");
       setWalletChain(null);
     } catch (error) {

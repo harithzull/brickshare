@@ -11,13 +11,20 @@
     "compile": "hardhat compile && node scripts/sync-frontend.js",
     "test": "hardhat test",
     "test:frontend": "npm --prefix react-frontend test",
+    "test:config": "node --test scripts/tests/*.test.cjs",
+    "test:integration": "node scripts/tests/local-deployment-smoke.cjs",
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:base-sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "verify:base-sepolia": "hardhat run scripts/verify.js --network baseSepolia",
     "dev": "npm --prefix react-frontend run dev",
+    "dev:testnet": "npm --prefix react-frontend run dev:testnet",
     "build": "npm --prefix react-frontend run build",
+    "build:testnet": "npm --prefix react-frontend run build:testnet",
     "preview": "npm --prefix react-frontend run preview"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-verify": "^2.1.3",
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "hardhat": "^2.22.19",
     "hardhat-gas-reporter": "^2.3.0"

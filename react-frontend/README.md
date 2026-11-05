@@ -4,6 +4,9 @@ The main application uses React 18, Vite, and ethers.js v5.
 Follow the [root setup and run guide](../README.md) for the full local workflow.
 See [DESIGN.md](DESIGN.md) for the page/component structure, visual system,
 accessibility behavior, and trust boundaries.
+For Base Sepolia, public env variables and static hosting, follow the
+[Phase 1 deployment guide](../docs/DEPLOYMENT.md). The current frontend remains
+backend-independent; the NestJS/PostgreSQL service is a future design only.
 
 Visitors can browse live listings without connecting a wallet. The marketplace
 includes search, filters, property details and an explicit fictional sample
@@ -38,6 +41,12 @@ npm run dev
 
 Do not paste addresses or edit the ABI by hand. Restart Vite after deployment,
 especially when the deployment file did not exist when Vite started.
+
+The ignored generated deployment file is now **localhost-only**. Base Sepolia
+reads `../deployments/baseSepolia.json`, or public `VITE_CONTRACT_ADDRESS` plus
+`VITE_DEPLOYMENT_BLOCK` overrides. Set `VITE_NETWORK=baseSepolia` and use
+`npm run dev:testnet` / `npm run build:testnet`; missing testnet configuration
+fails the build. Neither private keys nor explorer keys belong in frontend env files.
 
 The app can build without a deployment, but connecting a wallet requires one.
 For a working production demo, deploy before `npm run build` so the address is

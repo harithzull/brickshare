@@ -23,15 +23,15 @@ does not verify property titles or provide refunds, rental income, or resale ser
 
 ## 2. Actors
 
-| Actor | Responsibility and access |
-| --- | --- |
-| Visitor | Browses live listings and fictional samples without connecting a wallet. |
-| Investor / token holder | Connects a wallet, buys tokens, views their portfolio, and transfers tokens they own. |
+| Actor                          | Responsibility and access                                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Visitor                        | Browses live listings and fictional samples without connecting a wallet.                                                  |
+| Investor / token holder        | Connects a wallet, buys tokens, views their portfolio, and transfers tokens they own.                                     |
 | Administrator / contract owner | The deployment wallet; creates listings, changes their purchase status, and withdraws funds. Can also act as an investor. |
-| Recipient | Receives tokens at a nonzero address. Does not need to connect to the website before receiving them. |
-| Developer / maintainer | Installs dependencies, runs the local chain, deploys the contract, publishes presentation metadata, and verifies changes. |
-| Browser wallet | Supplies the selected account and network, requests signing approval, and submits transactions. |
-| Blockchain / RPC | Serves contract data and event logs, validates transactions, records balances, and returns receipts. |
+| Recipient                      | Receives tokens at a nonzero address. Does not need to connect to the website before receiving them.                      |
+| Developer / maintainer         | Installs dependencies, runs the local chain, deploys the contract, publishes presentation metadata, and verifies changes. |
+| Browser wallet                 | Supplies the selected account and network, requests signing approval, and submits transactions.                           |
+| Blockchain / RPC               | Serves contract data and event logs, validates transactions, records balances, and returns receipts.                      |
 
 There is no username/password registration, server account, or administrator
 login separate from wallet ownership. Hiding or disabling a button is not the
@@ -39,30 +39,34 @@ permission boundary: the Solidity contract enforces restricted operations.
 
 ## 3. Use-case index
 
-| ID | Use case | Primary actor | Status |
-| --- | --- | --- | --- |
-| UC-01 | Browse live property listings | Visitor | Application |
-| UC-02 | Search and filter listings | Visitor | Application |
-| UC-03 | View property details | Visitor | Application |
-| UC-04 | View supporting documents | Visitor | Application |
-| UC-05 | Explore the fictional sample catalog | Visitor | Application |
-| UC-06 | Connect a wallet | Investor / administrator | Application |
-| UC-07 | Switch to the expected network | Wallet user | Application |
-| UC-08 | Disconnect or change wallet context | Wallet user | Application |
-| UC-09 | Review and confirm a transaction | Wallet user | Application |
-| UC-10 | Purchase property tokens | Investor / administrator | Application |
-| UC-11 | View holdings and ownership percentages | Token holder | Application |
-| UC-12 | View purchase and transfer history | Wallet user | Application |
-| UC-13 | Transfer property tokens | Token holder | Application |
-| UC-14 | Access the administrator workspace | Administrator | Application |
-| UC-15 | Create a property listing | Administrator | Application |
-| UC-16 | View collected funds | Administrator | Application |
-| UC-17 | Withdraw collected funds | Administrator | Application |
-| UC-18 | Activate or deactivate purchases | Administrator | Application |
-| UC-19 | Refresh data and recover from connection failures | Visitor / wallet user | Application |
-| UC-20 | Supply descriptions, photographs, and documents | Maintainer | Developer workflow |
-| UC-21 | Set up and deploy the local demo | Developer | Developer workflow |
-| UC-22 | Verify and build the project | Developer | Developer workflow |
+| ID    | Use case                                          | Primary actor            | Status             |
+| ----- | ------------------------------------------------- | ------------------------ | ------------------ |
+| UC-01 | Browse live property listings                     | Visitor                  | Application        |
+| UC-02 | Search and filter listings                        | Visitor                  | Application        |
+| UC-03 | View property details                             | Visitor                  | Application        |
+| UC-04 | View supporting documents                         | Visitor                  | Application        |
+| UC-05 | Explore the fictional sample catalog              | Visitor                  | Application        |
+| UC-06 | Connect a wallet                                  | Investor / administrator | Application        |
+| UC-07 | Switch to the expected network                    | Wallet user              | Application        |
+| UC-08 | Disconnect or change wallet context               | Wallet user              | Application        |
+| UC-09 | Review and confirm a transaction                  | Wallet user              | Application        |
+| UC-10 | Purchase property tokens                          | Investor / administrator | Application        |
+| UC-11 | View holdings and ownership percentages           | Token holder             | Application        |
+| UC-12 | View purchase and transfer history                | Wallet user              | Application        |
+| UC-13 | Transfer property tokens                          | Token holder             | Application        |
+| UC-14 | Access the administrator workspace                | Administrator            | Application        |
+| UC-15 | Create a property listing                         | Administrator            | Application        |
+| UC-16 | View collected funds                              | Administrator            | Application        |
+| UC-17 | Withdraw collected funds                          | Administrator            | Application        |
+| UC-18 | Activate or deactivate purchases                  | Administrator            | Application        |
+| UC-19 | Refresh data and recover from connection failures | Visitor / wallet user    | Application        |
+| UC-20 | Supply descriptions, photographs, and documents   | Maintainer               | Developer workflow |
+| UC-21 | Set up and deploy the local demo                  | Developer                | Developer workflow |
+| UC-22 | Verify and build the project                      | Developer                | Developer workflow |
+| UC-23 | Deploy the existing contract to Base Sepolia      | Developer                | Developer workflow |
+| UC-24 | Verify deployed contract source                   | Developer                | Developer workflow |
+| UC-25 | Build and publish a public testnet demo           | Maintainer               | Developer workflow |
+| UC-26 | Run automated repository checks                   | Contributor              | Developer workflow |
 
 ## 4. Public browsing use cases
 
@@ -213,11 +217,11 @@ executable schemes such as `javascript:` are rejected.
 
 1. The application requests the expected chain through the wallet.
 2. The user approves the switch.
-3. If the wallet does not know local Hardhat, the application requests adding its network configuration.
+3. If the wallet does not know the selected supported network (local Hardhat or Base Sepolia), the application requests adding its public network configuration and explicitly switches to it.
 4. The application asks the user to reconnect on the selected network.
 
 **Alternatives:** The user declines, the wallet rejects the RPC configuration,
-or an unknown non-Hardhat network must be added manually.
+or the wallet refuses network addition/switching. Other networks are not deployment targets in Phase 1.
 
 **Postcondition:** The selected wallet network is suitable for reconnection, or an actionable error is shown.
 
@@ -594,36 +598,102 @@ always refers to the visitor's own machine.
 
 ## 9. Shared business rules
 
-| Rule | Current behavior |
-| --- | --- |
-| Administrator identity | `owner` is fixed to the deployment caller; no ownership-transfer function exists. |
-| Property identity | IDs start at 1 and increase per added listing. |
-| Supply accounting | For each property, available supply plus all wallet balances equals total supply. |
-| Token precision | Whole-number token quantities; ETH prices/payments use integer wei. |
-| Purchase payment | `msg.value` must exactly equal quantity multiplied by price. |
-| Purchase availability | Property exists, is active, and has enough unsold tokens. |
-| Transfer availability | Property exists and sender has enough tokens; active status is not required. |
-| Withdrawal permission | Owner only; withdraws the whole nonzero contract balance. |
-| Read permissions | Property details and balances are publicly readable; the balance helper is owner-only but address ETH balance is public. |
-| Metadata authority | Source-configured presentation information never replaces on-chain financial fields. |
-| Sample isolation | Fictional samples are explicitly selected and cannot transact. |
-| Gas | State-changing operations require gas, including transfers and administrative actions. |
-| Portfolio percentages | Recorded wallet tokens divided by fixed property supply; not verified legal ownership. |
+### Phase 1 platform use cases
+
+#### UC-23 — Deploy the existing contract to Base Sepolia
+
+**Actor:** Developer. **Preconditions:** Dedicated test-wallet key and HTTPS RPC
+configured outside source control; sufficient Base Sepolia test ETH.
+
+**Flow:** Run `npm run deploy:base-sepolia`; validate supported network and signer;
+confirm actual chain ID; deploy the unchanged contract; write the public
+network-specific manifest after a successful receipt. The deployment caller
+remains owner and no properties are automatically seeded.
+
+**Failures:** Missing/invalid key, insufficient test balance, wrong RPC chain, or
+reverted deployment produce errors. No mainnet target is supported. Do not retry
+blindly after a successful transaction whose local file write failed.
+
+**Postcondition:** A separate Base Sepolia contract and reviewed public deployment
+facts exist; localhost metadata and contract permissions are unchanged.
+
+#### UC-24 — Verify deployed contract source
+
+**Actor:** Developer. **Preconditions:** Public Base Sepolia manifest, matching
+source/artifact, reachable chain, and private Etherscan V2 API key.
+
+**Flow:** Run `npm run verify:base-sepolia`; check recorded chain and bytecode;
+submit source with no constructor arguments; inspect the explorer code page.
+
+**Failures:** Missing API key/record, mismatched bytecode, explorer indexing delay,
+or API refusal produce errors. Verification does not deploy another contract or
+require an investor/private signing key.
+
+**Postcondition:** Source is published/matched by the explorer, or verification
+remains explicitly pending. This is not a security audit or property verification.
+
+#### UC-25 — Build and publish a public testnet demo
+
+**Actor:** Maintainer. **Preconditions:** Actual Base Sepolia deployment address and
+receipt block, browser-safe HTTPS RPC, and an HTTPS static host.
+
+**Flow:** Select Base Sepolia through testnet mode/public env values; run
+`npm run build:testnet`; upload only `react-frontend/dist`; verify public reads,
+wallet onboarding, test transactions, and sample/live separation.
+
+**Failures:** Missing/wrong-network metadata, invalid address/block, insecure RPC,
+or common secret-prefixed variables stop the build. Runtime reads separately
+check the chain and deployed code; configuration validation is not proof of deployment.
+
+**Postcondition:** A publicly accessible test-funds demo is configured without
+shipping Node-side deployment secrets. Hosting and real-wallet acceptance are manual.
+
+#### UC-26 — Run automated repository checks
+
+**Actor:** Contributor / GitHub Actions. **Trigger:** Push, pull request, or workflow dispatch.
+
+**Flow:** Install from lockfiles; run deployment-config and contract tests; compile
+and check ABI freshness; run frontend tests and ordinary/testnet-mode builds.
+The CI testnet build uses explicitly synthetic public configuration only.
+
+**Failures:** Any failed test/config validation/build fails its CI job. GitHub must
+have Actions enabled; required PR checks are configured by a repository maintainer.
+
+**Postcondition:** Check results exist without signing keys, real funds, automatic
+deployment, source verification, backend implementation, or database migrations.
+
+### Application rules
+
+| Rule                   | Current behavior                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Administrator identity | `owner` is fixed to the deployment caller; no ownership-transfer function exists.                                        |
+| Property identity      | IDs start at 1 and increase per added listing.                                                                           |
+| Supply accounting      | For each property, available supply plus all wallet balances equals total supply.                                        |
+| Token precision        | Whole-number token quantities; ETH prices/payments use integer wei.                                                      |
+| Purchase payment       | `msg.value` must exactly equal quantity multiplied by price.                                                             |
+| Purchase availability  | Property exists, is active, and has enough unsold tokens.                                                                |
+| Transfer availability  | Property exists and sender has enough tokens; active status is not required.                                             |
+| Withdrawal permission  | Owner only; withdraws the whole nonzero contract balance.                                                                |
+| Read permissions       | Property details and balances are publicly readable; the balance helper is owner-only but address ETH balance is public. |
+| Metadata authority     | Source-configured presentation information never replaces on-chain financial fields.                                     |
+| Sample isolation       | Fictional samples are explicitly selected and cannot transact.                                                           |
+| Gas                    | State-changing operations require gas, including transfers and administrative actions.                                   |
+| Portfolio percentages  | Recorded wallet tokens divided by fixed property supply; not verified legal ownership.                                   |
 
 ## 10. Contract traceability
 
-| Use case | Contract calls / reads | Relevant event |
-| --- | --- | --- |
-| UC-01 / UC-03 / UC-19 | `propertyCount()`, `getProperty(id)` | Reads only |
-| UC-06 / UC-14 | `owner()` | Reads only |
-| UC-10 | `buyTokens(id, amount)` with exact ETH payment | `TokensPurchased` |
-| UC-11 | `getTokenBalance(id, wallet)` | Reads only |
-| UC-12 | Wallet-filtered event-log queries | `TokensPurchased`, `TokensTransferred` |
-| UC-13 | `transferTokens(id, recipient, amount)` | `TokensTransferred` |
-| UC-15 | `addProperty(name, location, supply, priceWei)` | `PropertyCreated` |
-| UC-16 | RPC address balance read; optional owner-only `getContractBalance()` | Reads only |
-| UC-17 | `withdrawFunds()` | `FundsWithdrawn` |
-| UC-18 | `setPropertyStatus(id, active)` | `PropertyStatusChanged` |
+| Use case              | Contract calls / reads                                               | Relevant event                         |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------- |
+| UC-01 / UC-03 / UC-19 | `propertyCount()`, `getProperty(id)`                                 | Reads only                             |
+| UC-06 / UC-14         | `owner()`                                                            | Reads only                             |
+| UC-10                 | `buyTokens(id, amount)` with exact ETH payment                       | `TokensPurchased`                      |
+| UC-11                 | `getTokenBalance(id, wallet)`                                        | Reads only                             |
+| UC-12                 | Wallet-filtered event-log queries                                    | `TokensPurchased`, `TokensTransferred` |
+| UC-13                 | `transferTokens(id, recipient, amount)`                              | `TokensTransferred`                    |
+| UC-15                 | `addProperty(name, location, supply, priceWei)`                      | `PropertyCreated`                      |
+| UC-16                 | RPC address balance read; optional owner-only `getContractBalance()` | Reads only                             |
+| UC-17                 | `withdrawFunds()`                                                    | `FundsWithdrawn`                       |
+| UC-18                 | `setPropertyStatus(id, active)`                                      | `PropertyStatusChanged`                |
 
 The contract also exposes generated getters for `properties` and `ownership`.
 These are alternative public reads of stored state, rather than additional business workflows.
@@ -634,47 +704,47 @@ Use a fresh local deployment and three funded development wallets: administrator
 investor B, and recipient C. This sequence is an acceptance checklist, not a claim
 that every item has a dedicated automated test.
 
-| Scenario | Actions | Expected result |
-| --- | --- | --- |
-| Public access | Open the website without a wallet connection. | Live listings load when configured; browsing requests no wallet signature. |
-| Sample preview | Explicitly select a sample and inspect its document. | Fictional-data label is visible; no purchase action is available. |
-| Administrator access | Connect A and open Administration. | Listing and treasury controls appear. |
-| Initial listing | A creates 1,000 tokens at 0.01 ETH for Cyberjaya Condo. | Property #1 is active with all 1,000 tokens available; A owns zero unless A buys. |
-| Filter | Search Cyberjaya and choose Available. | Matching listing remains visible. |
-| Purchase cancellation | B reviews 10 tokens and cancels before wallet submission. | No tokens or payment move. |
-| Purchase success | B reviews and confirms 10 tokens. | B owns 10, available supply is 990, treasury receives 0.1 ETH; gas is separate. |
-| Investor dashboard | B opens My portfolio. | Property share is 1.00%; confirmed purchase history is visible. |
-| Invalid transfer | B attempts 11 tokens while owning 10. | Review/contract rejects it; no tokens move. |
-| Transfer success | B transfers 3 tokens to C. | B owns 7, C owns 3, available supply stays 990. |
-| Recipient view | C connects and opens My portfolio. | Holding of 3 tokens, 0.30% share, and received activity appear. |
-| Permission check | B attempts an owner-only contract operation. | The contract rejects the call. |
-| Deactivation | A reviews and confirms Deactivate in the property management table. | Purchases stop; existing transfers remain possible. |
-| Reactivation | A sets the same property active again. | Purchases are allowed when unsold supply remains. |
-| Withdrawal | A confirms withdrawal. | Collected funds are sent to A; B/C token balances do not change. |
-| Wallet rejection | Reject a signing request. | Failure/cancellation feedback appears; no successful action is reported. |
-| Wrong network | Connect a wallet on a different chain. | Mismatch is explained and network switching is offered. |
-| Account change | Change from B to C in the wallet. | Old wallet context clears; reconnect loads C's data. |
-| Network failure | Stop the read-only RPC and refresh. | Live availability error appears; samples are not substituted automatically. |
-| Sold-out listing | Purchase all remaining tokens of a test listing. | The listing is sold out and new purchases are unavailable. |
+| Scenario              | Actions                                                             | Expected result                                                                   |
+| --------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Public access         | Open the website without a wallet connection.                       | Live listings load when configured; browsing requests no wallet signature.        |
+| Sample preview        | Explicitly select a sample and inspect its document.                | Fictional-data label is visible; no purchase action is available.                 |
+| Administrator access  | Connect A and open Administration.                                  | Listing and treasury controls appear.                                             |
+| Initial listing       | A creates 1,000 tokens at 0.01 ETH for Cyberjaya Condo.             | Property #1 is active with all 1,000 tokens available; A owns zero unless A buys. |
+| Filter                | Search Cyberjaya and choose Available.                              | Matching listing remains visible.                                                 |
+| Purchase cancellation | B reviews 10 tokens and cancels before wallet submission.           | No tokens or payment move.                                                        |
+| Purchase success      | B reviews and confirms 10 tokens.                                   | B owns 10, available supply is 990, treasury receives 0.1 ETH; gas is separate.   |
+| Investor dashboard    | B opens My portfolio.                                               | Property share is 1.00%; confirmed purchase history is visible.                   |
+| Invalid transfer      | B attempts 11 tokens while owning 10.                               | Review/contract rejects it; no tokens move.                                       |
+| Transfer success      | B transfers 3 tokens to C.                                          | B owns 7, C owns 3, available supply stays 990.                                   |
+| Recipient view        | C connects and opens My portfolio.                                  | Holding of 3 tokens, 0.30% share, and received activity appear.                   |
+| Permission check      | B attempts an owner-only contract operation.                        | The contract rejects the call.                                                    |
+| Deactivation          | A reviews and confirms Deactivate in the property management table. | Purchases stop; existing transfers remain possible.                               |
+| Reactivation          | A sets the same property active again.                              | Purchases are allowed when unsold supply remains.                                 |
+| Withdrawal            | A confirms withdrawal.                                              | Collected funds are sent to A; B/C token balances do not change.                  |
+| Wallet rejection      | Reject a signing request.                                           | Failure/cancellation feedback appears; no successful action is reported.          |
+| Wrong network         | Connect a wallet on a different chain.                              | Mismatch is explained and network switching is offered.                           |
+| Account change        | Change from B to C in the wallet.                                   | Old wallet context clears; reconnect loads C's data.                              |
+| Network failure       | Stop the read-only RPC and refresh.                                 | Live availability error appears; samples are not substituted automatically.       |
+| Sold-out listing      | Purchase all remaining tokens of a test listing.                    | The listing is sold out and new purchases are unavailable.                        |
 
 ## 12. Future use cases — not implemented
 
 These are potential extensions, not features of the current project and not promises
 about its suitability for real investment operations.
 
-| ID | Proposed use case | Major prerequisite |
-| --- | --- | --- |
+| ID     | Proposed use case                            | Major prerequisite                                                                          |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | FUT-01 | Investor eligibility / identity verification | Defined eligibility policy, private identity handling, and appropriate service integration. |
-| FUT-02 | Funding targets and deadlines | New contract lifecycle and explicit success/failure rules. |
-| FUT-03 | Escrow and campaign refunds | Fund segregation, withdrawal restrictions, and refund accounting. |
-| FUT-04 | Rental income distribution | Defined entitlements, periods, expenses, and transfer-aware accounting. |
-| FUT-05 | Paid secondary-market trades | Order/payment settlement, eligibility rules, and trading terms. |
-| FUT-06 | Standard token interoperability | Deliberate token-standard selection and migration to a new deployment. |
-| FUT-07 | Property sale and redemption | Clear token-holder rights and a settlement/redemption mechanism. |
-| FUT-08 | Multi-role or multisignature administration | Contract access-control and operational-policy changes. |
-| FUT-09 | Photo/document upload and verification | Authenticated storage, moderation, asset permissions, and verification procedures. |
-| FUT-10 | Statements, notifications, and reporting | Reporting requirements, event indexing, and delivery infrastructure. |
-| FUT-11 | Verified linkage to real property rights | Defined legal/operational structure and independently checked supporting records. |
+| FUT-02 | Funding targets and deadlines                | New contract lifecycle and explicit success/failure rules.                                  |
+| FUT-03 | Escrow and campaign refunds                  | Fund segregation, withdrawal restrictions, and refund accounting.                           |
+| FUT-04 | Rental income distribution                   | Defined entitlements, periods, expenses, and transfer-aware accounting.                     |
+| FUT-05 | Paid secondary-market trades                 | Order/payment settlement, eligibility rules, and trading terms.                             |
+| FUT-06 | Standard token interoperability              | Deliberate token-standard selection and migration to a new deployment.                      |
+| FUT-07 | Property sale and redemption                 | Clear token-holder rights and a settlement/redemption mechanism.                            |
+| FUT-08 | Multi-role or multisignature administration  | Contract access-control and operational-policy changes.                                     |
+| FUT-09 | Photo/document upload and verification       | Authenticated storage, moderation, asset permissions, and verification procedures.          |
+| FUT-10 | Statements, notifications, and reporting     | Reporting requirements, event indexing, and delivery infrastructure.                        |
+| FUT-11 | Verified linkage to real property rights     | Defined legal/operational structure and independently checked supporting records.           |
 
 ## 13. Implementation references
 

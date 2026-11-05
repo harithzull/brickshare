@@ -1,0 +1,18 @@
+{
+  "localhost": {
+    "chainId": 31337,
+    "name": "Hardhat Local",
+    "displayName": "Local testnet",
+    "rpcUrl": "http://127.0.0.1:8545",
+    "explorerUrl": null,
+    "nativeCurrency": { "name": "Test Ether", "symbol": "ETH", "decimals": 18 }
+  },
+  "baseSepolia": {
+    "chainId": 84532,
+    "name": "Base Sepolia",
+    "displayName": "Base Sepolia",
+    "rpcUrl": "https://sepolia.base.org",
+    "explorerUrl": "https://sepolia.basescan.org",
+    "nativeCurrency": { "name": "Test Ether", "symbol": "ETH", "decimals": 18 }
+  }
+}
