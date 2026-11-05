@@ -1,0 +1,59 @@
+name: BrickShare CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contracts and deployment configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run test:config
+      - run: npm run compile
+      - run: npm test
+      - name: Check committed ABI is current
+        run: git diff --exit-code -- react-frontend/src/generated/RealEstateTokenization.abi.json
+
+  frontend:
+    name: Frontend tests and builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: react-frontend/package-lock.json
+      - run: npm ci --prefix react-frontend
+      - run: npm run test:frontend
+      - run: npm run build
+      - name: Validate hosted-testnet build path with public test configuration
+        run: npm run build:testnet
+        env:
+          VITE_NETWORK: baseSepolia
+          # Syntax-only fixture, never deployed or uploaded as a demo.
+          VITE_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111"
+          VITE_DEPLOYMENT_BLOCK: "1"
+          VITE_RPC_URL: https://sepolia.base.org

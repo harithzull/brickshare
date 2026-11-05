@@ -3,6 +3,11 @@ node_modules/
 .env
 .env.*
 !.env.example
+!.env.testnet.example
+*.pem
+*.key
+secrets/
+keystore/
 *.log
 
 # Frontend build output and machine-specific deployment metadata

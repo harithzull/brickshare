@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "dev": "vite",
+    "dev:testnet": "vite --mode testnet",
     "build": "vite build",
+    "build:testnet": "vite build --mode testnet",
     "preview": "vite preview"
   },
   "dependencies": {

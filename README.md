@@ -8,6 +8,21 @@ This is a development demo. Token balances are application records; they do not
 establish legal ownership of a property. There is no rental income distribution,
 refund system, or secondary marketplace in this version.
 
+## BrickShare 2.0 — Phase 1
+
+The existing application now supports separate localhost and **Base Sepolia**
+deployments, validated public frontend configuration, source verification, and
+credential-free CI. Solidity behavior and owner permissions are unchanged.
+
+- [Deployment and hosted-testnet guide](docs/DEPLOYMENT.md)
+- [NestJS + PostgreSQL technical design](docs/ARCHITECTURE.md) — proposal only; no backend is implemented yet.
+- [Phase 1 delivery and verification](docs/PHASE_1.md)
+
+Signing/explorer credentials belong only in an ignored root `.env` based on
+`.env.example`. The frontend uses public variables from
+`react-frontend/.env.example` or `.env.testnet.example`. Never supply private
+deployment secrets to a static frontend host.
+
 ## How it works
 
 ```text
@@ -126,17 +141,23 @@ listings. The deployment address may repeat on a fresh chain; the old data does 
 
 ## Development commands
 
-| Command                 | Purpose                                                      |
-| ----------------------- | ------------------------------------------------------------ |
-| `npm run setup`         | Install both packages from lockfiles                         |
-| `npm run compile`       | Compile Solidity and regenerate the frontend ABI             |
-| `npm test`              | Run the real estate contract suite on a temporary test chain |
-| `npm run test:frontend` | Check purchase math, filters, public reads and event history |
-| `npm run node`          | Run the persistent-for-the-session local blockchain          |
-| `npm run deploy:local`  | Deploy to localhost and update frontend configuration        |
-| `npm run dev`           | Start the React development server                           |
-| `npm run build`         | Build the React frontend into `react-frontend/dist/`         |
-| `npm run preview`       | Preview the existing frontend production build               |
+| Command                       | Purpose                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `npm run setup`               | Install both packages from lockfiles                                       |
+| `npm run compile`             | Compile Solidity and regenerate the frontend ABI                           |
+| `npm test`                    | Run the real estate contract suite on a temporary test chain               |
+| `npm run test:frontend`       | Check purchase math, filters, public reads and event history               |
+| `npm run test:config`         | Validate deployment guards, manifests and secret redaction                 |
+| `npm run test:integration`    | Isolated localhost deployment/transaction and public-build smoke checks    |
+| `npm run node`                | Run the persistent-for-the-session local blockchain                        |
+| `npm run deploy:local`        | Deploy to localhost and update frontend configuration                      |
+| `npm run deploy:base-sepolia` | Deploy with a dedicated test wallet; write the public testnet manifest     |
+| `npm run verify:base-sepolia` | Verify the recorded Base Sepolia source without redeploying                |
+| `npm run dev`                 | Start the React development server                                         |
+| `npm run dev:testnet`         | Preview Base Sepolia using public testnet configuration                    |
+| `npm run build`               | Build the React frontend into `react-frontend/dist/`                       |
+| `npm run build:testnet`       | Build the hosted demo; fail if testnet deployment configuration is missing |
+| `npm run preview`             | Preview the existing frontend production build                             |
 
 After a Solidity change, compile, test, and redeploy before using the frontend.
 Builds work without a local deployment, but wallet actions require deployment.
@@ -146,8 +167,10 @@ embedded in the frontend bundle at build time.
 The backend tooling uses ethers v6 through Hardhat, while the React application
 uses ethers v5. Keep dependencies in their respective packages.
 
-The default read-only RPC is `http://127.0.0.1:8545`. Override it with
-`VITE_RPC_URL` in `react-frontend/.env.local` (see `.env.example`) if needed.
+The default network is localhost, with read-only RPC `http://127.0.0.1:8545`.
+Use `VITE_NETWORK=baseSepolia` or testnet mode for the public demo. Override
+`VITE_RPC_URL` in the matching frontend env file if needed. Testnet builds use
+their own manifest or explicit address/deployment block, never localhost's record.
 Vite variables are public browser configuration; do not put private credentials
 in them. A hosted demo needs a browser-accessible HTTPS RPC for its deployed
 network; localhost refers to each visitor's own machine.
@@ -162,6 +185,10 @@ Ignition deployment does not synchronize frontend configuration.
 ```text
 contracts/                 Solidity contract
 scripts/                   Deployment and frontend configuration generation
+config/                    Public network registry and Node-only deployment configuration
+deployments/               Reviewed public testnet deployment records (once deployed)
+docs/                      Deployment, Phase 1 delivery and future backend design
+.github/workflows/         Tests/builds only; no automatic deployment or secrets
 test/                      Active real estate contract tests
 ignition/modules/          Optional Ignition deployment module
 react-frontend/            Main React + Vite application

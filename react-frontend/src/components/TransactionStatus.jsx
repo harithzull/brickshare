@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Icon from "./Icon";
+import { EXPLORER_URL } from "../config";
 
 export default function TransactionStatus({ transaction, onDismiss }) {
   const heading = useRef(null);
@@ -56,6 +57,16 @@ export default function TransactionStatus({ transaction, onDismiss }) {
         <details>
           <summary>View transaction hash</summary>
           <code>{transaction.hash}</code>
+          {EXPLORER_URL && (
+            <a
+              className="text-link"
+              href={`${EXPLORER_URL}/tx/${transaction.hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on explorer <Icon name="arrowUpRight" size={14} />
+            </a>
+          )}
         </details>
       )}
     </section>
