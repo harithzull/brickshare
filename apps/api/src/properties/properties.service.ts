@@ -62,7 +62,7 @@ export class PropertiesService {
       },
       metadata: metadata ? {
         source: 'operator_metadata', version: metadata.version, title: metadata.title, location: metadata.location, description: metadata.description,
-        publicationState: metadata.state, updatedAt: metadata.updatedAt.toISOString(),
+        publicationState: metadata.state, updatedAt: metadata.updatedAt.toISOString(), characteristics: metadata.characteristics,
         assets: (metadata.assets || []).filter(link => link.asset).sort((a, b) => a.displayOrder - b.displayOrder || a.id.localeCompare(b.id)).map(link => this.assets.present(link)),
       } : null,
     };

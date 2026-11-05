@@ -162,6 +162,7 @@ export default function PropertyDetailsPage({ property, app, navigate }) {
               </div>
             </div>
           </section>
+          {property.characteristics && Object.keys(property.characteristics).length > 0 && <section className="panel detail-section"><p className="eyebrow">OPERATOR-SUPPLIED METADATA</p><h2>Property characteristics</h2><dl className="facts">{Object.entries(property.characteristics).filter(([key])=>['propertyType','bedrooms','bathrooms','areaSqm','yearBuilt'].includes(key)).map(([key,value])=><div key={key}><dt>{({propertyType:'Property type',bedrooms:'Bedrooms',bathrooms:'Bathrooms',areaSqm:'Area (m²)',yearBuilt:'Year built'})[key]}</dt><dd>{String(value)}</dd></div>)}</dl></section>}
           <section className="panel detail-section" id="property-tokenization">
             <p className="eyebrow">UNDERSTAND YOUR FRACTION</p>
             <h2>Tokenization details</h2>

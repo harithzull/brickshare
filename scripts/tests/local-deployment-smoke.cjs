@@ -132,7 +132,9 @@ async function main() {
   else fs.unlinkSync(localFile);
   const missingBuild = run(
     [vite, "build", "--mode", "testnet"],
-    {},
+    // Override local Vite files as well as process env: an opt-in localhost API
+    // must not mask the missing Base deployment check in this testnet fixture.
+    { VITE_API_BASE_URL: "" },
     path.join(root, "react-frontend")
   );
   if (!originalBase) {
@@ -153,6 +155,7 @@ async function main() {
       VITE_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111",
       VITE_DEPLOYMENT_BLOCK: "1",
       VITE_RPC_URL: "https://sepolia.base.org",
+      VITE_API_BASE_URL: "",
       DEPLOYER_PRIVATE_KEY: canary,
       ETHERSCAN_API_KEY: canary,
       BASE_SEPOLIA_RPC_URL: canary,

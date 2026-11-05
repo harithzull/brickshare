@@ -58,6 +58,22 @@ See [Phase 2C setup, security decisions and API reference](docs/PHASE_2C.md).
 Existing installations must run `npm run db:migrate` and use matching frontend/API
 hostnames: open **http://127.0.0.1:5173** with the default authentication settings.
 
+## BrickShare Studio — Phase 2D
+
+Authenticated organization members can manage private fictional metadata drafts,
+upload local images/documents, preview content and retain publication history.
+Editors prepare content; owners explicitly publish/archive it and link verified
+local-chain properties. Initial linking also requires signing in as that contract's
+owner; organization roles never grant Solidity privileges. Unlinked fictional
+publications stay inside Studio. Linked publications enrich the existing consumer
+marketplace without changing contract prices, supply, balances or transactions.
+
+Run the new migration with `npm run db:migrate`, restart the API/frontend, then
+open **Studio** after wallet sign-in. Use **New draft → Use fictional example**
+for demo content. Private local uploads live in ignored `.brickshare-storage/`;
+never expose that directory through a static web server.
+See [Studio setup, endpoints, security decisions and manual demo checklist](docs/PHASE_2D.md).
+
 ## How it works
 
 ```text

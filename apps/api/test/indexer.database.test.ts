@@ -49,8 +49,9 @@ function populated() {
 test('indexer migration upgrades Phase 2A without losing metadata; rollback/reapply works before history exists', async () => database(async source => {
   await source.undoLastMigration();
   await source.undoLastMigration();
+  await source.undoLastMigration();
   await source.query(`INSERT INTO properties(source,fixture_label) VALUES('fictional','preserved')`);
-  assert.equal((await source.runMigrations()).length, 2);
+  assert.equal((await source.runMigrations()).length, 3);
   assert.equal((await source.query('SELECT fixture_label FROM properties'))[0].fixture_label, 'preserved');
   assert.equal(await new DatabaseService(source, logger).ready(), 'ready');
 }));
@@ -148,6 +149,7 @@ test('reorged property creation does not inherit old metadata when the on-chain 
   const current = (await source.query('SELECT * FROM properties WHERE canonical_snapshot'))[0];
   assert.notEqual(current.id, old.id); assert.equal(current.chain_name, 'Replacement');
   assert.equal((await source.query('SELECT count(*) FROM property_metadata_versions WHERE property_id=$1', [current.id]))[0].count, '0');
+  await source.undoLastMigration();
   await source.undoLastMigration();
   await assert.rejects(source.undoLastMigration(), /Indexer rollback would collapse property history/);
 }));

@@ -87,9 +87,7 @@ test('full stack: real Hardhat, worker restart, Nest API, frontend metadata, reo
     await runProcess();
     assert.equal((await source.query('SELECT id FROM properties WHERE canonical_snapshot'))[0].id, first.id);
     assert.equal((await source.query('SELECT count(*) FROM chain_events'))[0].count, '4');
-    // Publish only an isolated test fixture through SQL; no write API is introduced.
-    await source.query(`INSERT INTO property_metadata_versions(property_id,version,state,title,description) VALUES($1,1,'published','TEST fixture title','Published full-stack test description')`, [first.id]);
-    const env = validateEnvironment({ NODE_ENV: 'test', DATABASE_URL: databaseUrl, DATABASE_SCHEMA: schema });
+    const env = validateEnvironment({ NODE_ENV: 'test', DATABASE_URL: databaseUrl, DATABASE_SCHEMA: schema, STUDIO_STORAGE_DIR:join(temp,'private-files'), STUDIO_RPC_URL:rpcUrl });
     const module = await Test.createTestingModule({ imports: [AppModule.register(env as unknown as Record<string, unknown>)] }).overrideProvider(DataSource).useValue(source).overrideProvider(JsonLogger).useValue(logger).compile();
     api = module.createNestApplication({ logger: false }); configureHttp(api, env, logger); await api.listen(0, '127.0.0.1');
     // Native import preserves the frontend's typed modules without including them
@@ -116,18 +114,29 @@ test('full stack: real Hardhat, worker restart, Nest API, frontend metadata, reo
       return response;
     };
     const auth = new AuthClient(apiSettings({ VITE_API_BASE_URL: await api.getUrl() }), env.AUTH_ORIGIN, cookieFetch);
-    const loginWallet = Wallet.createRandom(); // Unfunded ephemeral EOA; never used for transactions.
+    // Public Hardhat default development mnemonic, for this isolated local node only.
+    // The login wallet signs messages; existing contract test actions use node signers.
+    const loginWallet = Wallet.fromPhrase('test test test test test test test test test test test junk');
+    assert.equal(loginWallet.address,await deployer.getAddress());
     const challenge = await auth.nonce(loginWallet.address, 31337);
     await auth.verify(challenge, await loginWallet.signMessage(challenge.message));
     const session = await auth.me(); assert.equal(session.authenticated, true); assert.equal(session.user.platformRole, 'investor');
     const organization = (await auth.createOrganization('FICTIONAL full-stack Studio')).data;
     assert.equal(organization.role, 'owner'); assert.equal((await auth.members(organization.id)).data.length, 1);
+    const studioRecord=await auth.studioCreate(organization.id,{title:'FICTIONAL Studio fixture',location:'Local fictional location',description:'Published full-stack test description',characteristics:{bedrooms:3}});
+    const file=await auth.studioUpload(organization.id,studioRecord.id,{name:'fictional.txt',mimeType:'text/plain',base64:Buffer.from('FICTIONAL public supporting document').toString('base64')});
+    await auth.studioSave(organization.id,studioRecord.id,{title:'FICTIONAL Studio fixture',location:'Local fictional location',description:'Published full-stack test description',characteristics:{bedrooms:3},expectedRevision:1,assets:[{assetId:file.id,purpose:'supporting_document',altText:'',caption:'Fictional supporting document'}]});
+    await auth.studioAssociate(organization.id,studioRecord.id,first.id);
+    await auth.studioPublish(organization.id,studioRecord.id,2);
+    const media=await fetch((await api.getUrl())+'/api/v1/media/'+file.id);assert.equal(media.status,200);assert.match(media.headers.get('content-disposition')!,/^attachment/);
     await auth.logout(); assert.equal((await auth.me()).authenticated, false);
     const identity = { chainId: '31337', address: await contract.getAddress(), deploymentBlock: 1 };
     const catalog = await loadIndexedCatalog({ client, chain: identity, rpc: browserProvider, codeHash: keccak256, selectedId: '1' });
     const enriched = mergeIndexedCatalog(listings, catalog, 30000);
     assert.equal(enriched[0].description, 'Published full-stack test description');
     assert.equal(enriched[0].metadataInfo.source, 'api');
+    assert.equal(enriched[0].characteristics.bedrooms,3);
+    assert.equal(enriched[0].documents[0].url,(await api.getUrl())+'/api/v1/media/'+file.id);
     assert.equal(enriched[0].mine, '1');
     assert.equal(purchaseCost(enriched[0], '3').toString(), '30000000000000003');
     await source.query(`UPDATE indexer_cursors SET last_success_at=now()-interval '1 hour'`);
@@ -153,6 +162,7 @@ test('full stack: real Hardhat, worker restart, Nest API, frontend metadata, reo
     assert.equal((await source.query('SELECT reorg_count FROM indexer_cursors'))[0].reorg_count, 1);
     await (await contract.withdrawFunds()).wait(); await worker().tick();
     await provider.send('hardhat_reset', []);
+    assert.equal((await fetch((await api.getUrl())+'/api/v1/media/'+file.id)).status,409,'Media must reject a reset before worker notices it');
     await assert.rejects(worker().tick(), /reset_requires_rebind/);
     assert.equal((await source.query('SELECT count(*) FROM properties WHERE canonical_snapshot'))[0].count, '0');
     const replacement = await deploy();

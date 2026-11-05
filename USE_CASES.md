@@ -11,7 +11,10 @@ local read-only indexer with verified deployment import, property reconciliation
 restart/reorg/reset handling and freshness; see [indexer guide](docs/INDEXER.md).
 Phase 2B.2 joins published API metadata to RPC listings with deployment/instance
 checks, freshness labels and independent fallback; see [full-stack guide](docs/PHASE_2B_2.md).
-Authenticated Studio actions remain future; the existing React use cases below
+Phase 2C adds wallet application sessions and organization membership. Phase 2D
+adds private Studio drafts, local file management, owner-approved publication,
+version history and verified chain identity association; see [Studio use cases and
+manual checklist](docs/PHASE_2D.md). The existing React investment use cases below
 continue through RPC and wallet. See [API reference](docs/API.md) and
 [Phase 2A scope](docs/PHASE_2A.md).
 
@@ -44,9 +47,10 @@ does not verify property titles or provide refunds, rental income, or resale ser
 | Browser wallet                 | Supplies the selected account and network, requests signing approval, and submits transactions.                           |
 | Blockchain / RPC               | Serves contract data and event logs, validates transactions, records balances, and returns receipts.                      |
 
-There is no username/password registration, server account, or administrator
-login separate from wallet ownership. Hiding or disabling a button is not the
-permission boundary: the Solidity contract enforces restricted operations.
+There is no username/password registration. SIWE application login is separate
+from connecting a wallet or signing a transaction. NestJS enforces organization
+permissions for Studio content; Solidity enforces restricted contract operations.
+Off-chain owner/editor roles never grant contract-owner privileges.
 
 ## 3. Use-case index
 

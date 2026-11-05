@@ -5,8 +5,9 @@ by PostgreSQL 16 and TypeORM. Public catalog reads retain the optional
 Phase 2B.1 local indexing worker and Phase 2B.2 frontend metadata client.
 Phase 2C adds SIWE authentication and organization/membership management; see the
 [authentication API and CMD setup](PHASE_2C.md) for the implemented endpoints,
-cookie/CSRF protocol, permissions and limitations. Uploads, property CMS writes
-and financial writes are not included. The frontend does
+cookie/CSRF protocol, permissions and limitations. Phase 2D adds authenticated
+organization property metadata writes and controlled local file uploads/downloads;
+see [Studio API/setup](PHASE_2D.md). Financial writes are not included. The frontend does
 not require this API to browse through RPC or transact.
 The React application continues to use its existing RPC and wallet flows.
 

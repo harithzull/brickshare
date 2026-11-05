@@ -1,12 +1,13 @@
 export interface ApiAsset {
   id: string; kind: 'image' | 'document'; mimeType: string; byteSize: string;
   sha256: string; purpose: string; altText: string | null; caption: string | null;
-  url: string | null; availability: 'not_served_by_api' | 'configured_external_reference';
+  url: string | null; availability: 'not_served_by_api' | 'configured_external_reference' | 'local_published';
 }
 export interface PublishedMetadata {
   source: 'operator_metadata'; version: number; title: string | null;
   location: string | null; description: string | null; publicationState: 'published';
   updatedAt: string; assets: ApiAsset[];
+  characteristics?: Record<string, unknown>;
 }
 export interface SyncEntry {
   deploymentId: string; instanceId: string; chainId: string; contractAddress: string;

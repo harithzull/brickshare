@@ -110,10 +110,10 @@ export async function loadIndexedCatalog({ client, chain, rpc, codeHash, selecte
   finally { clearTimeout(timer); signal?.removeEventListener('abort', parentAbort); if (rejectAbort) controller.signal.removeEventListener('abort', rejectAbort); controller.abort(); }
 }
 
-// API assets must be external HTTPS references, not arbitrary local/app routes.
+// External HTTPS references or strictly bounded local Studio media routes.
 function assetUrl(value: string | null) {
   if (!value) return null;
-  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : null; } catch { return null; }
+  try { const url = new URL(value); const local = url.protocol === 'http:' && ['127.0.0.1','localhost','[::1]'].includes(url.hostname) && /^\/api\/v1\/media\/[a-f0-9-]{36}$/i.test(url.pathname) && !url.search && !url.hash; return (url.protocol === 'https:' || local) && !url.username && !url.password ? url.href : null; } catch { return null; }
 }
 export function mergeIndexedCatalog<T extends RpcListing>(listings: T[], catalog: IndexedCatalog, maxAgeMs: number, now = Date.now()) {
   const eligible = catalog.state === 'ready' && !!catalog.sync && recent(catalog.sync, maxAgeMs, now) && now - catalog.checkedAt <= maxAgeMs;
@@ -123,12 +123,14 @@ export function mergeIndexedCatalog<T extends RpcListing>(listings: T[], catalog
       return record.source === 'blockchain' && !record.isFictional && !!b && b.onChainId === listing.id && b.chainId === sync.chainId && same(b.contractAddress, sync.contractAddress) && b.deploymentId === sync.deploymentId && b.deploymentInstanceId === sync.instanceId;
     }) : undefined;
     const metadata = row?.metadata;
-    const image = metadata?.assets.find(asset => asset.kind === 'image' && asset.purpose === 'hero' && asset.availability === 'configured_external_reference' && assetUrl(asset.url));
-    const documents = metadata?.assets.filter(asset => asset.kind === 'document' && asset.purpose === 'supporting_document' && asset.availability === 'configured_external_reference' && assetUrl(asset.url)).map(asset => ({ title: asset.caption || 'Published supporting document', url: assetUrl(asset.url)! }));
+    const available = (value: string) => ['configured_external_reference','local_published'].includes(value);
+    const image = metadata?.assets.find(asset => asset.kind === 'image' && asset.purpose === 'hero' && available(asset.availability) && assetUrl(asset.url));
+    const documents = metadata?.assets.filter(asset => asset.kind === 'document' && asset.purpose === 'supporting_document' && available(asset.availability) && assetUrl(asset.url)).map(asset => ({ title: asset.caption || 'Published supporting document', url: assetUrl(asset.url)! }));
     return {
       ...listing,
       ...(metadata ? {
         description: metadata.description || listing.description,
+        characteristics: metadata.characteristics ?? {},
         image: image ? assetUrl(image.url)! : listing.image,
         imageAlt: image ? image.altText || listing.name : listing.imageAlt,
         imageCaption: image ? image.caption || 'Published image · operator supplied' : listing.imageCaption,
@@ -139,7 +141,7 @@ export function mergeIndexedCatalog<T extends RpcListing>(listings: T[], catalog
         status: eligible ? row ? metadata ? 'published' : 'not_published' : 'not_indexed' : catalog.state === 'ready' ? 'stale' : catalog.state,
         apiId: row?.id ?? null, indexedBlock: row?.blockchain?.observedBlock ?? null,
         version: metadata?.version ?? null, updatedAt: metadata?.updatedAt ?? null,
-        title: metadata?.title ?? null, unavailableAssets: metadata?.assets.filter(asset => !assetUrl(asset.url) || asset.availability !== 'configured_external_reference').length ?? 0,
+        title: metadata?.title ?? null, unavailableAssets: metadata?.assets.filter(asset => !assetUrl(asset.url) || !available(asset.availability)).length ?? 0,
         usedLocalFallback: !!metadata && ((!metadata.description && !!listing.description) || (!image && !!listing.image) || (!documents?.length && !!listing.documents?.length)),
       },
     };

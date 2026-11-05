@@ -11,7 +11,7 @@ export function parseRoute(hash) {
       return { page: "home", mode: "live" };
     }
   }
-  const page = ["marketplace", "portfolio", "admin", "organizations"].includes(parts[0])
+  const page = ["marketplace", "portfolio", "admin", "organizations", "studio"].includes(parts[0])
     ? parts[0]
     : "home";
   return { page, mode: page === "marketplace" ? mode : "live" };

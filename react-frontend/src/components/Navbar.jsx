@@ -69,7 +69,7 @@ export default function Navbar({ route, app, auth }) {
     ["marketplace", "Properties"],
     ["portfolio", "My portfolio"],
     ["admin", "Administration"],
-    ...(auth?.session ? [["organizations", "Organizations"]] : []),
+    ...(auth?.session ? [["studio", "Studio"], ["organizations", "Organizations"]] : []),
   ];
   return (
     <>

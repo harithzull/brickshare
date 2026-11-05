@@ -9,8 +9,8 @@
     "build": "tsc -p tsconfig.json && node scripts/copy-sql.cjs",
     "dev": "node --watch -r ts-node/register src/main.ts",
     "start": "node dist/src/main.js",
-    "test": "npm run build && node --test dist/test/unit.test.js dist/test/indexer.unit.test.js dist/test/auth.unit.test.js",
-    "test:db": "npm run build && node --test --test-concurrency=1 dist/test/database.test.js dist/test/indexer.database.test.js dist/test/auth.database.test.js",
+    "test": "npm run build && node --test dist/test/unit.test.js dist/test/indexer.unit.test.js dist/test/auth.unit.test.js dist/test/studio.unit.test.js",
+    "test:db": "npm run build && node --test --test-concurrency=1 dist/test/database.test.js dist/test/indexer.database.test.js dist/test/auth.database.test.js dist/test/studio.database.test.js",
     "auth:platform-admin": "ts-node src/auth/admin-cli.ts",
     "worker:dev": "ts-node src/indexer/main.ts",
     "worker:start": "node dist/src/indexer/main.js",
@@ -32,6 +32,7 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "sharp": "0.35.5",
     "siwe": "3.0.0",
     "typeorm": "0.3.31"
   },

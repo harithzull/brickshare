@@ -1,6 +1,6 @@
 import { plainToInstance, Transform } from 'class-transformer';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Matches, Max, Min, validateSync } from 'class-validator';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, sep, parse } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 
 const integer = ({ value }: { value: unknown }) => typeof value === 'number' ? value : typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN;
@@ -24,6 +24,8 @@ export class Environment {
   @Transform(integer) @IsInt() @Min(60) @Max(86400) AUTH_SESSION_TTL_SECONDS = 3600;
   @Transform(boolean) @IsBoolean() AUTH_COOKIE_SECURE = false;
   @Transform(boolean) @IsBoolean() ALLOW_LOCAL_ADMIN_BOOTSTRAP = false;
+  @IsString() STUDIO_STORAGE_DIR = '.brickshare-storage';
+  @IsString() STUDIO_RPC_URL = 'http://127.0.0.1:8545';
 }
 
 export function validateEnvironment(input: Record<string, unknown>): Environment {
@@ -41,6 +43,13 @@ export function validateEnvironment(input: Record<string, unknown>): Environment
     if (env.ASSET_PUBLIC_BASE_URL) { const asset = new URL(env.ASSET_PUBLIC_BASE_URL); if (asset.protocol !== 'https:' || asset.username || asset.password || asset.search || asset.hash) throw new Error(); }
     if (env.NODE_ENV === 'production' && (!env.DATABASE_SSL || origins.some(origin => !origin.startsWith('https://')))) throw new Error();
     const auth = new URL(env.AUTH_ORIGIN);
+    const studioRpc = new URL(env.STUDIO_RPC_URL);
+    if (studioRpc.protocol !== 'http:' || !['localhost','127.0.0.1','[::1]'].includes(studioRpc.hostname) || studioRpc.username || studioRpc.password || studioRpc.search || studioRpc.hash || studioRpc.pathname !== '/') throw new Error();
+    // Storage is never served statically; restrict configuration to a private root.
+    if (!env.STUDIO_STORAGE_DIR.trim() || /[\x00-\x1f]/.test(env.STUDIO_STORAGE_DIR)) throw new Error();
+    const normalizePath = (value:string) => process.platform === 'win32' ? value.toLowerCase() : value;
+    const workspace = normalizePath(resolve(apiRoot,'../..')); const storage = normalizePath(resolve(workspace,env.STUDIO_STORAGE_DIR)); const privateRoot = join(workspace,'.brickshare-storage');
+    if (storage === parse(storage).root || workspace === storage || workspace.startsWith(storage+sep) || (storage.startsWith(workspace+sep) && storage !== privateRoot && !storage.startsWith(privateRoot+sep))) throw new Error();
     if (auth.origin !== env.AUTH_ORIGIN || auth.username || auth.password || !origins.includes(env.AUTH_ORIGIN)) throw new Error();
     if (auth.protocol !== 'https:' && !(auth.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(auth.hostname) && env.NODE_ENV !== 'production')) throw new Error();
     if (!['localhost', '127.0.0.1', '[::1]'].includes(auth.hostname) && !env.AUTH_COOKIE_SECURE) throw new Error();

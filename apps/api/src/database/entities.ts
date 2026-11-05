@@ -63,6 +63,7 @@ export class PropertyMetadataVersion extends Row {
   @Column({ type: 'text', nullable: true }) location!: string | null;
   @Column({ type: 'text', nullable: true }) description!: string | null;
   @Column({ name: 'author_reference', type: 'varchar', length: 160, nullable: true }) authorReference!: string | null;
+  @Column({ type: 'jsonb', default: {} }) characteristics!: Record<string, unknown>;
   @OneToMany(() => PropertyAsset, link => link.metadataVersion) assets!: PropertyAsset[];
 }
 

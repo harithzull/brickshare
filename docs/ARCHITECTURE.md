@@ -7,9 +7,12 @@ Phase 2B.2 adds a typed optional frontend catalog/metadata client, provenance an
 freshness checks, explicit source labels and RPC fallback. See [full-stack integration](PHASE_2B_2.md).
 Phase 2C implements EOA SIWE sessions and multi-tenant organizations with
 server-enforced roles, wallet-bound invitations and security audit logs. See
-[Phase 2C implementation/security specification](PHASE_2C.md). Public-chain indexing,
-durable portfolio/activity projections, property write APIs and object storage
-remain proposed. See [indexer design/setup](INDEXER.md),
+[Phase 2C implementation/security specification](PHASE_2C.md). Phase 2D implements
+tenant-owned Studio drafts, immutable published version history, owner-approved
+publication into the existing metadata read model, and private local file storage.
+See [Studio implementation/security specification](PHASE_2D.md). Public-chain indexing,
+durable portfolio/activity projections and cloud object storage remain proposed.
+See [indexer design/setup](INDEXER.md),
 [Phase 2A decisions](PHASE_2A.md) and [API reference](API.md).
 
 ## 1. Architectural decision
@@ -83,6 +86,34 @@ OperatorGrant, deployment-scoped content publication and holdings remain
 **proposed**; organization roles do not implicitly create these grants. Phase 2B.1 also
 implements deployment instances, blocks, events and cursors (see below). Internal IDs are UUIDs;
 a property's on-chain ID is a separate uint256. Never identify a property by token ID alone.
+
+Phase 2D supersedes the proposed OperatorGrant publication boundary with tenant
+memberships and explicit record association: an organization owner who also proves
+the current local deployment's contract-owner wallet may claim an unclaimed
+indexed property UUID. Existing legacy operator metadata is never claimed
+automatically. A claim includes the property creation/deployment-instance identity
+already captured by the indexer, and cannot be rebound after reset/reorg. This
+proves permission to associate content; it changes no on-chain permissions.
+
+New tables are `studio_records`, `studio_versions`, `studio_assets`,
+`studio_version_assets`, and `studio_audit_logs`. Composite tenant/record foreign
+keys prevent attachment references crossing records or organizations. Private
+versions are separate from `property_metadata_versions`; only explicit owner
+publication copies a snapshot into that existing public read model. Published
+property characteristics are immutable JSON, alongside descriptions and attachment
+references. Superseding/archiving withdraws the prior public snapshot atomically.
+Unbound fictional publications have no public projection and no financial values.
+
+StudioStorage is an injectable put/read/remove boundary, implemented with a private
+local directory. The API checks hashes and publication/tenant access before serving
+bytes; no directory is statically hosted. The consumer client resolves exact
+relative media routes against its configured API, keeps existing RPC provenance
+checks, and accepts bounded loopback HTTP media paths for local development.
+Association/publication/public media independently recheck live Hardhat run,
+genesis, deployment receipt, runtime bytecode and canonical indexed-block identity.
+An offline/stale/mismatched chain blocks publication/media without blocking private
+draft editing or archiving. As with all read models, chain state can change after a
+check; consumer provenance verification and wallet RPC reads remain essential.
 
 ### Identity, authentication and administration
 
