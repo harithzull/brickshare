@@ -25,7 +25,7 @@ export class SynchronizationService {
       observedHead: row.observed_head, observedLag: row.observed_head !== null && row.last_scanned_block !== null ? (BigInt(row.observed_head) > BigInt(row.last_scanned_block) ? BigInt(row.observed_head) - BigInt(row.last_scanned_block) : 0n).toString() : null,
       lastAttemptAt: row.last_attempt_at?.toISOString() ?? null, lastSuccessAt: row.last_success_at?.toISOString() ?? null,
       finalityPolicy: row.finality_policy, errorCode: row.error_code, reorgCount: row.reorg_count, revision: row.revision,
-      provenance: { receiptAndRuntimeVerifiedAtImport: true, abiHash: `0x${row.abi_hash.toString('hex')}`, runtimeHash: `0x${row.runtime_hash.toString('hex')}`, deploymentBlock: row.deployment_block, deploymentBlockHash: `0x${row.deployment_block_hash.toString('hex')}`, transactionHash: `0x${row.transaction_hash.toString('hex')}`, releaseReference: row.release_reference },
+      provenance: { receiptAndRuntimeVerifiedAtImport: true, hardhatInstanceId: `0x${row.hardhat_instance_id.toString('hex')}`, genesisHash: `0x${row.genesis_hash.toString('hex')}`, abiHash: `0x${row.abi_hash.toString('hex')}`, runtimeHash: `0x${row.runtime_hash.toString('hex')}`, deploymentBlock: row.deployment_block, deploymentBlockHash: `0x${row.deployment_block_hash.toString('hex')}`, transactionHash: `0x${row.transaction_hash.toString('hex')}`, releaseReference: row.release_reference },
     })) };
   }
 }

@@ -1,5 +1,9 @@
 # Phase 2B.1 delivery — local read-only indexer
 
+This is the historical indexing delivery record. The subsequent
+[Phase 2B.2 integration](PHASE_2B_2.md) connects React to published API metadata while
+preserving RPC authority, adds public genesis/run provenance and expands live tests.
+
 ## Implemented
 
 - A separate Nest application-context worker with validated local-only Hardhat

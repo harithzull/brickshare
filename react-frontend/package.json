@@ -4,11 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs",
+    "test": "npm run typecheck:api && node --test test/*.test.mjs",
+    "typecheck:api": "tsc -p tsconfig.api.json",
     "dev": "vite",
     "dev:testnet": "vite --mode testnet",
-    "build": "vite build",
-    "build:testnet": "vite build --mode testnet",
+    "build": "npm run typecheck:api && vite build",
+    "build:testnet": "npm run typecheck:api && vite build --mode testnet",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
+    "react-test-renderer": "18.2.0",
+    "typescript": "~5.9.3",
     "vite": "^5.1.0"
   }
 }

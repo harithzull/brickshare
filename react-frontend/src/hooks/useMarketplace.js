@@ -10,8 +10,17 @@ import {
 } from "../config";
 import metadata from "../data/property-metadata.json";
 import { readProperties, readActivity } from "../lib/marketplace";
+import { ApiClient, apiSettings } from "../lib/api-client.ts";
+import useIndexedMetadata from "./useIndexedMetadata";
 
-export default function useMarketplace(account) {
+const identity = { chainId: String(EXPECTED_CHAIN_ID), address: CONTRACT_ADDRESS, deploymentBlock: DEPLOYMENT_BLOCK };
+const codeHash = (code) => ethers.utils.keccak256(code);
+let metadataClient = null;
+let metadataConfigurationError = null;
+try { metadataClient = new ApiClient(apiSettings(import.meta.env, CHAIN.networkName)); }
+catch (error) { metadataConfigurationError = error.message; }
+
+export default function useMarketplace(account, { mode = "live", propertyId = null } = {}) {
   const [state, setState] = useState({
     dataAccount: null,
     status: "loading",
@@ -93,6 +102,7 @@ export default function useMarketplace(account) {
       setState({
         dataAccount: account,
         status: "ready",
+        readAt: new Date().toISOString(),
         properties: catalog,
         owner,
         balance: balance.toString(),
@@ -145,6 +155,13 @@ export default function useMarketplace(account) {
     };
   }, [refresh]);
 
+  const indexed = useIndexedMetadata({
+    listings: state.properties,
+    ready: mode === "live" && state.status === "ready" && state.dataAccount === account && !refreshing,
+    rpc: provider, chain: identity, client: metadataClient, codeHash, selectedId: propertyId,
+    configurationError: metadataConfigurationError,
+  });
+
   // Never expose a previous wallet's holdings while a new wallet is loading.
   if (state.dataAccount !== account)
     return {
@@ -158,5 +175,5 @@ export default function useMarketplace(account) {
       refresh,
       provider,
     };
-  return { ...state, refreshing, refresh, provider };
+  return { ...state, properties: indexed.properties, metadata: indexed.metadata, refreshing, refresh, provider };
 }

@@ -43,6 +43,7 @@ jobs:
           cache-dependency-path: apps/api/package-lock.json
       - run: npm run setup:api
       - run: npm ci
+      - run: npm ci --prefix react-frontend
       - run: npm run compile
       - run: npm run test:api
       - run: npm run test:api:db

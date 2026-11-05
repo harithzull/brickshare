@@ -4,11 +4,14 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolveChainConfig } from "./src/lib/chain-config.js";
 import networks from "../config/networks.json";
+import { apiSettings } from "./src/lib/api-client.ts";
 
 const readRecord = (url) =>
   existsSync(url) ? JSON.parse(readFileSync(url, "utf8")) : undefined;
 export default defineConfig(({ command, mode }) => {
   if (command === "build") {
+    const publicEnv = loadEnv(mode, fileURLToPath(new URL(".", import.meta.url)), "VITE_");
+    apiSettings(publicEnv, publicEnv.VITE_NETWORK?.trim() || (mode === "testnet" ? "baseSepolia" : "localhost"));
     resolveChainConfig({
       env: loadEnv(mode, fileURLToPath(new URL(".", import.meta.url)), "VITE_"),
       mode,

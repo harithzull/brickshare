@@ -1,6 +1,7 @@
 import PropertyArt from "./PropertyArt";
 import Icon from "./Icon";
 import { PropertyStatusBadge, SubscriptionProgress } from "./ui";
+import PropertyMetadataStatus from "./PropertyMetadataStatus";
 
 export default function PropertyCard({ property, onSelect }) {
   return (
@@ -25,6 +26,7 @@ export default function PropertyCard({ property, onSelect }) {
             {property.name}
           </button>
         </h3>
+        <PropertyMetadataStatus property={property} />
         <div className="price-line">
           <strong>
             {property.priceEth} <small>ETH</small>

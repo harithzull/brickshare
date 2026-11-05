@@ -9,6 +9,8 @@ can check process/database readiness, list configured networks, query published
 property metadata and run guarded fictional fixtures. Phase 2B.1 adds a separate
 local read-only indexer with verified deployment import, property reconciliation,
 restart/reorg/reset handling and freshness; see [indexer guide](docs/INDEXER.md).
+Phase 2B.2 joins published API metadata to RPC listings with deployment/instance
+checks, freshness labels and independent fallback; see [full-stack guide](docs/PHASE_2B_2.md).
 Authenticated Studio actions remain future; the existing React use cases below
 continue through RPC and wallet. See [API reference](docs/API.md) and
 [Phase 2A scope](docs/PHASE_2A.md).

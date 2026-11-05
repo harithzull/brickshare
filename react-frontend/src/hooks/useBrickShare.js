@@ -20,7 +20,7 @@ const networkName =
   NETWORK_NAMES[EXPECTED_CHAIN_ID] || `Chain ${EXPECTED_CHAIN_ID}`;
 
 // Existing wallet and transaction orchestration, separated from page presentation.
-export default function useBrickShare({ mode = "live" }) {
+export default function useBrickShare({ mode = "live", propertyId = null }) {
   const [wallet, setWallet] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [walletChain, setWalletChain] = useState(null);
@@ -30,7 +30,7 @@ export default function useBrickShare({ mode = "live" }) {
   const [estimating, setEstimating] = useState(false);
   const lock = useRef(false);
   const walletSession = useRef(0);
-  const market = useMarketplace(wallet?.account || null);
+  const market = useMarketplace(wallet?.account || null, { mode, propertyId });
   const isOwner =
     !!wallet && market.owner?.toLowerCase() === wallet.account.toLowerCase();
   const busy =

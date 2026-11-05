@@ -15,7 +15,7 @@ deployments, validated public frontend configuration, source verification, and
 credential-free CI. Solidity behavior and owner permissions are unchanged.
 
 - [Deployment and hosted-testnet guide](docs/DEPLOYMENT.md)
-- [NestJS + PostgreSQL architecture](docs/ARCHITECTURE.md) — Phase 2A foundation implemented; indexing and authentication remain planned.
+- [NestJS + PostgreSQL architecture](docs/ARCHITECTURE.md) — local indexing and optional frontend metadata integration implemented; authentication remains planned.
 - [Phase 1 delivery and verification](docs/PHASE_1.md)
 
 Signing/explorer credentials belong only in an ignored root `.env` based on
@@ -42,6 +42,13 @@ For worker startup, API freshness and local reset recovery, see the
 React continues to use contract/RPC reads as its financial authority.
 See [Phase 2B.1 delivery and verification](docs/PHASE_2B_1.md) for the file inventory.
 
+Phase 2B.2 connects React to the optional API for published descriptions, images,
+documents and indexer status. Enable it with `VITE_API_BASE_URL=http://127.0.0.1:3001`
+in `react-frontend/.env.local`, then restart Vite. RPC still supplies every price,
+supply, wallet balance and transaction input. Stale/mismatched API metadata is
+withheld; API failure leaves RPC browsing and wallet actions available.
+See the [full-stack CMD startup and troubleshooting guide](docs/PHASE_2B_2.md).
+
 ## How it works
 
 ```text
@@ -50,8 +57,9 @@ React frontend -> ethers.js -> MetaMask -> Hardhat blockchain -> Solidity contra
 
 The contract stores listings, token balances, and purchase funds. The deployment
 wallet is the administrator. The optional Phase 2A NestJS/PostgreSQL service stores
-versioned presentation metadata; the frontend still reads directly from the chain
-and runs independently of this service.
+versioned presentation metadata. The frontend optionally reads published metadata
+after chain/deployment/block checks and continues to work independently through
+RPC if the API is disabled or unavailable.
 
 The marketplace can read live listings through a read-only RPC without MetaMask.
 Search by name/location and filter by location or availability, then open a

@@ -1169,3 +1169,13 @@ progress::-moz-progress-bar {
 .purchase-panel .notice {
   font-size: 11px;
 }
+.metadata-provenance {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.metadata-provenance p { margin: 4px 0; }
+.metadata-provenance strong { color: var(--navy); }
+.metadata-provenance.panel { padding: 18px 24px; margin-bottom: 20px; }
+.metadata-provenance.compact { margin-bottom: 12px; }
